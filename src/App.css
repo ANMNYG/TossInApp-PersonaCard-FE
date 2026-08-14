@@ -26,7 +26,7 @@
   font-size: 10px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--gold-soft);
+  color: var(--gold-text);
   margin-bottom: 8px;
 }
 
@@ -64,6 +64,10 @@
 .btn:active {
   transform: scale(0.97);
 }
+.btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
 
 .btn-outline {
   border: 1px solid var(--line);
@@ -72,7 +76,7 @@
   text-align: center;
   font-weight: 700;
   font-size: 13px;
-  background: transparent;
+  background: var(--panel-2);
   color: var(--text);
   cursor: pointer;
 }
@@ -87,16 +91,6 @@
   cursor: pointer;
   text-decoration: underline;
   text-underline-offset: 3px;
-}
-
-.icon-btn {
-  border: none;
-  background: none;
-  color: var(--muted);
-  font-size: 15px;
-  line-height: 1;
-  padding: 4px;
-  cursor: pointer;
 }
 
 /* ---- intro screen ---- */
@@ -166,7 +160,7 @@
 }
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, var(--gold), var(--gold-soft));
+  background: linear-gradient(90deg, var(--gold), var(--gold-light));
   transition: width 0.35s ease;
 }
 
@@ -198,11 +192,11 @@
     transform 0.1s ease;
 }
 .opt:hover {
-  border-color: var(--gold-soft);
+  border-color: var(--gold-light);
 }
 .opt.picked {
   border-color: var(--gold);
-  background: rgba(201, 162, 39, 0.14);
+  background: var(--gold-soft);
   transform: scale(0.99);
 }
 
@@ -238,7 +232,7 @@
 .loading-pct {
   font-family: 'Fraunces', serif;
   font-size: 15px;
-  color: var(--gold-soft);
+  color: var(--gold-text);
 }
 
 /* ---- result screen ---- */
@@ -286,26 +280,8 @@
 }
 
 /* ---- share screen ---- */
-.share-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 8px;
+.share-cta {
   margin-bottom: 18px;
-}
-.share-opt {
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  padding: 14px 4px;
-  text-align: center;
-  font-size: 11px;
-  color: var(--text);
-  cursor: pointer;
-  background: var(--panel-2);
-}
-.share-icon {
-  font-size: 18px;
-  display: block;
-  margin-bottom: 6px;
 }
 .sub-card {
   border: 1px solid var(--gold);
@@ -331,7 +307,7 @@
   width: 100%;
 }
 
-/* ---- dialog (payment simulation) ---- */
+/* ---- dialog ---- */
 .dialog-overlay {
   position: absolute;
   inset: 0;
