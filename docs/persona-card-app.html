@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>AI 페르소나 카드</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0f0e1a;
+    --panel: #17162a;
+    --panel-2: #1e1c35;
+    --gold: #c9a227;
+    --gold-soft: #e3c766;
+    --text: #f2efe4;
+    --muted: #8d8aa8;
+    --line: #322f4d;
+    --fire: #e2572c;
+    --water: #2c8ce2;
+    --earth: #5a9153;
+    --air: #b79ce8;
+  }
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Noto Sans KR', -apple-system, sans-serif;
+    min-height:100vh;
+  }
+  body{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px 12px;
+  }
+  .frame{
+    width:100%;
+    max-width:380px;
+  }
+  .device{
+    width:100%;
+    aspect-ratio: 9/18.5;
+    max-height:800px;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:32px;
+    box-shadow:0 30px 60px -20px rgba(0,0,0,0.6);
+    position:relative;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+  }
+  .statusbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:14px 20px 4px;
+    font-size:11px;
+    color:var(--muted);
+    font-family:monospace;
+    letter-spacing:0.03em;
+  }
+  .screen{
+    flex:1;
+    display:none;
+    flex-direction:column;
+    padding:14px 20px 22px;
+    overflow-y:auto;
+  }
+  .screen.active{display:flex;}
+
+  /* ---- typography helpers ---- */
+  .eyebrow{
+    font-family:monospace;
+    font-size:10px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--gold-soft);
+    margin-bottom:8px;
+  }
+  h1.display{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:26px;
+    line-height:1.25;
+    margin:0 0 10px;
+  }
+  p.lede{
+    font-size:13px;
+    line-height:1.6;
+    color:var(--muted);
+    margin:0 0 20px;
+  }
+
+  /* ---- intro screen ---- */
+  .card-preview{
+    width:100%;
+    aspect-ratio: 3/4;
+    border-radius:16px;
+    border:1px solid var(--line);
+    background:
+      radial-gradient(circle at 30% 20%, rgba(226,87,44,0.55), transparent 60%),
+      radial-gradient(circle at 70% 80%, rgba(183,156,232,0.35), transparent 55%),
+      linear-gradient(160deg,#241f3d,#120f22);
+    margin-bottom:16px;
+    position:relative;
+    overflow:hidden;
+  }
+  .card-preview::after{
+    content:"예시 카드";
+    position:absolute;
+    bottom:10px;
+    left:12px;
+    font-family:monospace;
+    font-size:10px;
+    color:rgba(255,255,255,0.55);
+    letter-spacing:0.05em;
+  }
+  .tags{display:flex;gap:6px;margin-bottom:22px;flex-wrap:wrap;}
+  .tag{
+    font-family:monospace;
+    font-size:10px;
+    border:1px solid var(--line);
+    color:var(--muted);
+    padding:4px 9px;
+    border-radius:20px;
+  }
+  .spacer{flex:1;}
+  .liveline{
+    font-family:monospace;
+    font-size:10px;
+    color:var(--muted);
+    text-align:center;
+    margin-top:10px;
+  }
+
+  /* ---- buttons ---- */
+  .btn{
+    border:none;
+    border-radius:26px;
+    padding:15px;
+    text-align:center;
+    font-weight:700;
+    font-size:14px;
+    cursor:pointer;
+    background:var(--gold);
+    color:#141221;
+    font-family:'Noto Sans KR', sans-serif;
+    transition:transform .15s ease, opacity .15s ease;
+  }
+  .btn:active{transform:scale(0.97);}
+  .btn-outline{
+    border:1px solid var(--line);
+    border-radius:26px;
+    padding:13px;
+    text-align:center;
+    font-weight:700;
+    font-size:13px;
+    background:transparent;
+    color:var(--text);
+    cursor:pointer;
+    margin-top:10px;
+  }
+  .btn-ghost{
+    border:none;
+    background:none;
+    color:var(--muted);
+    font-size:12px;
+    text-align:center;
+    padding:12px;
+    cursor:pointer;
+    text-decoration:underline;
+    text-underline-offset:3px;
+  }
+
+  /* ---- question screen ---- */
+  .qtop{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-family:monospace;
+    font-size:11px;
+    color:var(--muted);
+    margin-bottom:10px;
+  }
+  .progress{
+    height:4px;
+    background:var(--line);
+    border-radius:4px;
+    overflow:hidden;
+    margin-bottom:26px;
+  }
+  .progress-fill{
+    height:100%;
+    background:linear-gradient(90deg,var(--gold),var(--gold-soft));
+    transition:width .35s ease;
+  }
+  .qtext{
+    font-family:'Fraunces', serif;
+    font-size:21px;
+    font-weight:600;
+    line-height:1.4;
+    margin-bottom:24px;
+  }
+  .options{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .opt{
+    border:1px solid var(--line);
+    background:var(--panel-2);
+    color:var(--text);
+    border-radius:14px;
+    padding:15px 16px;
+    font-size:14px;
+    text-align:left;
+    cursor:pointer;
+    transition:border-color .15s ease, background .15s ease, transform .1s ease;
+  }
+  .opt:hover{border-color:var(--gold-soft);}
+  .opt.picked{
+    border-color:var(--gold);
+    background:rgba(201,162,39,0.14);
+    transform:scale(0.99);
+  }
+
+  /* ---- loading screen ---- */
+  .loading-wrap{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    gap:18px;
+  }
+  .ring{
+    width:64px;height:64px;
+    border-radius:50%;
+    border:3px solid var(--line);
+    border-top-color:var(--gold);
+    animation:spin 1s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .loading-text{
+    font-family:monospace;
+    font-size:12px;
+    color:var(--muted);
+    min-height:16px;
+  }
+  .loading-pct{
+    font-family:'Fraunces',serif;
+    font-size:15px;
+    color:var(--gold-soft);
+  }
+
+  /* ---- result screen ---- */
+  .result-card-wrap{
+    position:relative;
+    margin-bottom:16px;
+  }
+  canvas#resultCanvas{
+    width:100%;
+    aspect-ratio:3/4;
+    border-radius:16px;
+    border:1px solid var(--line);
+    display:block;
+  }
+  .watermark{
+    position:absolute;
+    bottom:12px;
+    right:12px;
+    font-family:monospace;
+    font-size:9px;
+    background:rgba(0,0,0,0.55);
+    color:rgba(255,255,255,0.8);
+    padding:3px 7px;
+    border-radius:5px;
+    letter-spacing:0.05em;
+  }
+  .persona-title{
+    font-family:'Fraunces', serif;
+    font-size:22px;
+    font-weight:700;
+    margin:2px 0 6px;
+  }
+  .persona-desc{
+    font-size:12.5px;
+    line-height:1.65;
+    color:var(--muted);
+    margin-bottom:18px;
+  }
+  .btn-row{display:flex;gap:8px;}
+  .btn-row .btn-outline{flex:1;margin-top:0;}
+
+  /* ---- share screen ---- */
+  .share-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    gap:8px;
+    margin-bottom:18px;
+  }
+  .share-opt{
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:14px 4px;
+    text-align:center;
+    font-size:11px;
+    color:var(--text);
+    cursor:pointer;
+    background:var(--panel-2);
+  }
+  .share-icon{font-size:18px;display:block;margin-bottom:6px;}
+  .sub-card{
+    border:1px solid var(--gold);
+    border-radius:16px;
+    padding:16px;
+    background:linear-gradient(160deg, rgba(201,162,39,0.12), transparent);
+    margin-bottom:14px;
+  }
+  .sub-card .eyebrow{margin-bottom:4px;}
+  .sub-price{
+    font-family:'Fraunces',serif;
+    font-size:19px;
+    margin:4px 0 10px;
+  }
+  .sub-price span{font-size:11px;color:var(--muted);font-family:'Noto Sans KR';}
+
+  /* ---- modal (payment simulation) ---- */
+  .modal-overlay{
+    position:absolute;
+    inset:0;
+    background:rgba(5,4,12,0.72);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+    z-index:10;
+  }
+  .modal-overlay.active{display:flex;}
+  .modal{
+    background:var(--panel-2);
+    border:1px solid var(--line);
+    border-radius:18px;
+    padding:22px 20px;
+    width:100%;
+  }
+  .modal .eyebrow{color:var(--muted);}
+  .modal h3{
+    font-family:'Fraunces',serif;
+    font-size:17px;
+    margin:4px 0 8px;
+  }
+  .modal p{
+    font-size:12.5px;
+    color:var(--muted);
+    line-height:1.6;
+    margin:0 0 18px;
+  }
+
+  .dots{
+    display:flex;
+    justify-content:center;
+    gap:6px;
+    padding:10px 0 4px;
+  }
+  .dot{width:5px;height:5px;border-radius:50%;background:var(--line);}
+  .dot.on{background:var(--gold);}
+</style>
+</head>
+<body>
+
+<div class="frame">
+  <div class="device" id="device">
+
+    <div class="statusbar">
+      <span>토스 미니앱</span>
+      <span id="statusStep">프로토타입</span>
+    </div>
+
+    <!-- SCREEN 0: 인트로 -->
+    <div class="screen active" id="screen-intro">
+      <div class="eyebrow">✦ AI 페르소나 카드</div>
+      <h1 class="display">7개 질문으로<br>만나는 나의 원소 카드</h1>
+      <div class="card-preview"></div>
+      <div class="tags">
+        <span class="tag">1분 소요</span>
+        <span class="tag">로그인 불필요</span>
+        <span class="tag">공유 시 리롤 1회 무료</span>
+      </div>
+      <div class="spacer"></div>
+      <button class="btn" onclick="goTo('q', 0)">지금 만들어보기</button>
+      <div class="liveline">오늘 12,384명이 자신의 카드를 만들었어요</div>
+    </div>
+
+    <!-- SCREEN 1: 질문 (JS로 동적 렌더링) -->
+    <div class="screen" id="screen-q">
+      <div class="qtop">
+        <span id="qIndexLabel">질문 1 / 7</span>
+        <span style="cursor:pointer;" onclick="goTo('intro')">✕</span>
+      </div>
+      <div class="progress"><div class="progress-fill" id="qProgress" style="width:0%"></div></div>
+      <div class="qtext" id="qText"></div>
+      <div class="options" id="qOptions"></div>
+    </div>
+
+    <!-- SCREEN 2: 로딩 -->
+    <div class="screen" id="screen-loading">
+      <div class="loading-wrap">
+        <div class="ring"></div>
+        <div class="loading-pct" id="loadPct">0%</div>
+        <div class="loading-text" id="loadText">답변을 분석하는 중...</div>
+      </div>
+    </div>
+
+    <!-- SCREEN 3: 결과 -->
+    <div class="screen" id="screen-result">
+      <div class="result-card-wrap">
+        <canvas id="resultCanvas" width="480" height="640"></canvas>
+        <div class="watermark" id="watermarkTag">PERSONA CARD · 무료버전</div>
+      </div>
+      <div class="eyebrow" id="resultElement">FIRE TYPE</div>
+      <div class="persona-title" id="resultTitle">불꽃 탐험가</div>
+      <div class="persona-desc" id="resultDesc">설명이 여기 표시됩니다.</div>
+      <button class="btn" onclick="openModal()">워터마크 없이 저장 · 500원</button>
+      <div class="btn-row">
+        <button class="btn-outline" onclick="goTo('q', 0)">다시 만들기</button>
+        <button class="btn-outline" onclick="goTo('share')">공유하기</button>
+      </div>
+
+      <div class="modal-overlay" id="payModal">
+        <div class="modal">
+          <div class="eyebrow">결제 시뮬레이션</div>
+          <h3>고화질 카드 저장</h3>
+          <p>실제 서비스에서는 앱인토스 결제 SDK로 500원이 결제되고, 워터마크 없는 원본 이미지가 저장돼요. 이 프로토타입은 흐름만 시뮬레이션합니다.</p>
+          <button class="btn" onclick="fakePay()">500원 결제하기</button>
+          <button class="btn-ghost" onclick="closeModal()">닫기</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCREEN 4: 공유 -->
+    <div class="screen" id="screen-share">
+      <div class="eyebrow">공유하고 리롤 받기</div>
+      <h1 class="display" style="font-size:20px;">친구에게 공유하면<br>스타일 1회 무료 변경</h1>
+      <div class="share-grid">
+        <div class="share-opt" onclick="fakeShare('카카오톡')"><span class="share-icon">💬</span>카톡</div>
+        <div class="share-opt" onclick="fakeShare('인스타그램')"><span class="share-icon">📸</span>인스타</div>
+        <div class="share-opt" onclick="fakeShare('링크')"><span class="share-icon">🔗</span>링크복사</div>
+      </div>
+
+      <div class="sub-card">
+        <div class="eyebrow">구독</div>
+        <div class="sub-price">매주 새 테마 카드 <span>월 4,900원</span></div>
+        <button class="btn-outline" style="margin-top:0;" onclick="openModal()">구독 시작하기</button>
+      </div>
+
+      <div class="spacer"></div>
+      <button class="btn-ghost" onclick="goTo('intro')">홈으로 돌아가기</button>
+    </div>
+
+  </div>
+
+  <div class="dots" id="dots">
+    <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+  </div>
+</div>
+
+<script>
+/* ---------------- 데이터: 질문 세트 ---------------- */
+const QUESTIONS = [
+  { q:"오늘 나의 에너지는?", opts:[
+      {t:"활활 타오름", el:"fire"},{t:"잔잔하게 흐름", el:"water"},
+      {t:"단단하게 뿌리내림", el:"earth"},{t:"가볍게 떠다님", el:"air"}]},
+  { q:"쉬는 날 나는?", opts:[
+      {t:"새로운 곳을 탐험함", el:"fire"},{t:"좋아하는 영화 정주행", el:"water"},
+      {t:"집 정리하고 계획 세우기", el:"earth"},{t:"훌쩍 즉흥 여행", el:"air"}]},
+  { q:"친구들 사이에서 나는?", opts:[
+      {t:"분위기 메이커", el:"fire"},{t:"조용히 들어주는 사람", el:"water"},
+      {t:"믿고 의지하는 사람", el:"earth"},{t:"예측불가 자유인", el:"air"}]},
+  { q:"스트레스 받을 때 나는?", opts:[
+      {t:"확 풀어버림", el:"fire"},{t:"혼자 조용히 삭힘", el:"water"},
+      {t:"루틴으로 다잡음", el:"earth"},{t:"딴 생각으로 도피", el:"air"}]},
+  { q:"좋아하는 색감은?", opts:[
+      {t:"강렬한 레드·오렌지", el:"fire"},{t:"깊은 블루·틸", el:"water"},
+      {t:"자연스러운 그린·브라운", el:"earth"},{t:"파스텔 라벤더·화이트", el:"air"}]},
+  { q:"내가 추구하는 관계는?", opts:[
+      {t:"열정적으로 부딪히는 사이", el:"fire"},{t:"깊이 이해하는 사이", el:"water"},
+      {t:"오래도록 안정적인 사이", el:"earth"},{t:"서로의 자유를 존중하는 사이", el:"air"}]},
+  { q:"지금 나에게 필요한 한마디는?", opts:[
+      {t:"“더 뜨겁게”", el:"fire"},{t:"“괜찮아, 천천히”", el:"water"},
+      {t:"“지금 이대로도 충분해”", el:"earth"},{t:"“훌쩍 떠나도 돼”", el:"air"}]}
+];
+
+const PERSONAS = {
+  fire:{
+    title:"불꽃 탐험가",
+    tagEn:"FIRE TYPE",
+    color:["#e2572c","#f2a13c"],
+    desc:"도전을 두려워하지 않고 새로운 자극을 찾아 나서는 타입이에요. 뜨거운 에너지로 주변 분위기를 이끌고, 멈춰있는 것보다 움직이는 쪽을 택해요."
+  },
+  water:{
+    title:"잔잔한 몽상가",
+    tagEn:"WATER TYPE",
+    color:["#2c8ce2","#5fd0c9"],
+    desc:"깊이 느끼고 조용히 관찰하는 타입이에요. 겉으로 잔잔해 보여도 내면엔 섬세한 파도가 흐르고, 진짜 이해받는 관계를 소중히 여겨요."
+  },
+  earth:{
+    title:"단단한 수호자",
+    tagEn:"EARTH TYPE",
+    color:["#5a9153","#a9c86e"],
+    desc:"흔들리지 않는 뿌리 같은 사람이에요. 루틴과 안정감 속에서 힘을 얻고, 곁에 있는 사람들에게 믿음직한 존재가 되어줘요."
+  },
+  air:{
+    title:"자유로운 방랑자",
+    tagEn:"AIR TYPE",
+    color:["#8b6fd9","#b79ce8"],
+    desc:"어디에도 얽매이지 않고 가볍게 떠다니는 타입이에요. 예측불가한 매력으로 주변을 환기시키고, 자유가 곧 에너지원이에요."
+  }
+};
+
+/* ---------------- 상태 ---------------- */
+let currentQ = 0;
+let answers = [];
+let scores = {fire:0, water:0, earth:0, air:0};
+
+const screenOrder = ["intro","q","loading","result","share"];
+
+function goTo(name, resetQIndex){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  document.getElementById("screen-"+name).classList.add("active");
+
+  const dots = document.querySelectorAll("#dots .dot");
+  dots.forEach(d=>d.classList.remove("on"));
+  const idx = screenOrder.indexOf(name);
+  if(dots[idx]) dots[idx].classList.add("on");
+
+  if(name === "q"){
+    if(resetQIndex === 0){
+      currentQ = 0; answers = []; scores = {fire:0,water:0,earth:0,air:0};
+    }
+    renderQuestion();
+  }
+  if(name === "loading"){
+    runLoading();
+  }
+}
+
+function renderQuestion(){
+  const item = QUESTIONS[currentQ];
+  document.getElementById("qIndexLabel").textContent = `질문 ${currentQ+1} / ${QUESTIONS.length}`;
+  document.getElementById("qProgress").style.width = `${(currentQ/QUESTIONS.length)*100}%`;
+  document.getElementById("qText").textContent = item.q;
+
+  const wrap = document.getElementById("qOptions");
+  wrap.innerHTML = "";
+  item.opts.forEach(opt=>{
+    const btn = document.createElement("button");
+    btn.className = "opt";
+    btn.textContent = opt.t;
+    btn.onclick = ()=>selectOption(btn, opt.el);
+    wrap.appendChild(btn);
+  });
+}
+
+function selectOption(btn, element){
+  document.querySelectorAll("#qOptions .opt").forEach(o=>o.classList.remove("picked"));
+  btn.classList.add("picked");
+  scores[element]++;
+
+  setTimeout(()=>{
+    currentQ++;
+    if(currentQ < QUESTIONS.length){
+      renderQuestion();
+    } else {
+      document.getElementById("qProgress").style.width = "100%";
+      goTo("loading");
+    }
+  }, 260);
+}
+
+function runLoading(){
+  const texts = [
+    "답변을 분석하는 중...",
+    "원소 기운을 계산하는 중...",
+    "당신만의 색을 조합하는 중...",
+    "카드를 그리는 중..."
+  ];
+  let pct = 0;
+  document.getElementById("loadPct").textContent = "0%";
+  document.getElementById("loadText").textContent = texts[0];
+
+  const interval = setInterval(()=>{
+    pct += Math.floor(Math.random()*18)+8;
+    if(pct >= 100){
+      pct = 100;
+      clearInterval(interval);
+      setTimeout(()=>{
+        buildResult();
+        goTo("result");
+      }, 260);
+    }
+    document.getElementById("loadPct").textContent = pct+"%";
+    document.getElementById("loadText").textContent = texts[Math.min(Math.floor(pct/26), texts.length-1)];
+  }, 260);
+}
+
+/* ---------------- 결과 카드 생성 (캔버스로 시뮬레이션) ---------------- */
+function getTopElement(){
+  return Object.keys(scores).reduce((a,b)=> scores[a] >= scores[b] ? a : b);
+}
+
+function buildResult(){
+  const el = getTopElement();
+  const persona = PERSONAS[el];
+
+  document.getElementById("resultElement").textContent = persona.tagEn;
+  document.getElementById("resultTitle").textContent = persona.title;
+  document.getElementById("resultDesc").textContent = persona.desc;
+  document.getElementById("watermarkTag").textContent = "PERSONA CARD · 무료버전";
+
+  drawCard(persona);
+}
+
+function drawCard(persona){
+  const canvas = document.getElementById("resultCanvas");
+  const ctx = canvas.getContext("2d");
+  const w = canvas.width, h = canvas.height;
+  ctx.clearRect(0,0,w,h);
+
+  // 배경 그라디언트 (페르소나 색상 기반)
+  const bgGrad = ctx.createLinearGradient(0,0,w,h);
+  bgGrad.addColorStop(0, "#161329");
+  bgGrad.addColorStop(1, "#0c0a18");
+  ctx.fillStyle = bgGrad;
+  ctx.fillRect(0,0,w,h);
+
+  // 시드값: 답변 조합 기반 (같은 조합이면 같은 비주얼)
+  let seed = 0;
+  Object.values(scores).forEach((v,i)=> seed += v * (i+3) * 17);
+
+  function rand(offset){
+    const x = Math.sin(seed + offset) * 10000;
+    return x - Math.floor(x);
+  }
+
+  // 원소 상징 원형 오브젝트들
+  for(let i=0;i<7;i++){
+    const r = 30 + rand(i)*90;
+    const x = rand(i*3+1)*w;
+    const y = rand(i*3+2)*h;
+    const grad = ctx.createRadialGradient(x,y,0,x,y,r);
+    grad.addColorStop(0, persona.color[i%2] + "cc");
+    grad.addColorStop(1, persona.color[i%2] + "00");
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(x,y,r,0,Math.PI*2);
+    ctx.fill();
+  }
+
+  // 중앙 상징 아이콘 (심플 지오메트릭)
+  ctx.save();
+  ctx.translate(w/2, h*0.42);
+  ctx.strokeStyle = persona.color[1];
+  ctx.lineWidth = 3;
+  ctx.globalAlpha = 0.85;
+  ctx.beginPath();
+  for(let i=0;i<6;i++){
+    const a = (Math.PI/3)*i;
+    const px = Math.cos(a)*70, py = Math.sin(a)*70;
+    if(i===0) ctx.moveTo(px,py); else ctx.lineTo(px,py);
+  }
+  ctx.closePath();
+  ctx.stroke();
+  ctx.restore();
+
+  // 카드 프레임 라인
+  ctx.strokeStyle = "rgba(255,255,255,0.14)";
+  ctx.lineWidth = 2;
+  ctx.strokeRect(14,14,w-28,h-28);
+
+  // 하단 텍스트
+  ctx.fillStyle = "rgba(255,255,255,0.9)";
+  ctx.font = "600 30px 'Fraunces', serif";
+  ctx.textAlign = "center";
+  ctx.fillText(persona.title, w/2, h-70);
+
+  ctx.font = "12px monospace";
+  ctx.fillStyle = "rgba(255,255,255,0.5)";
+  ctx.fillText(persona.tagEn + " · PERSONA CARD", w/2, h-42);
+}
+
+/* ---------------- 결제 / 공유 시뮬레이션 ---------------- */
+function openModal(){ document.getElementById("payModal").classList.add("active"); }
+function closeModal(){ document.getElementById("payModal").classList.remove("active"); }
+function fakePay(){
+  document.getElementById("watermarkTag").textContent = "PERSONA CARD · 고화질";
+  closeModal();
+}
+function fakeShare(channel){
+  alert(`[프로토타입] ${channel} 공유 시트가 열리는 것을 시뮬레이션합니다.\n실제 서비스에서는 토스 SDK의 공유 기능이 연결돼요.`);
+}
+</script>
+
+</body>
+</html>
