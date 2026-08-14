@@ -17,7 +17,7 @@ export function IntroScreen({ onStart }: IntroScreenProps) {
       <div className="tags">
         <span className="tag">1분 완성</span>
         <span className="tag">로그인 없이 시작</span>
-        <span className="tag">공유하면 리롤 무료</span>
+        <span className="tag">완성 후 바로 공유</span>
       </div>
       <div className="spacer" />
       <button type="button" className="btn" onClick={onStart}>

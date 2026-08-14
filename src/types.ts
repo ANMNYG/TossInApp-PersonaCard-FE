@@ -23,4 +23,4 @@ export interface Persona {
 export type DialogState =
   | { kind: 'payment' }
   | { kind: 'subscription' }
-  | { kind: 'share'; channelPhrase: string }
+  | { kind: 'share-error' }

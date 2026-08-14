@@ -1,4 +1,5 @@
 import type { Persona } from '../types'
+import { AdSlot } from './AdSlot'
 import { ResultCard } from './ResultCard'
 
 export interface ResultScreenProps {
@@ -35,6 +36,7 @@ export function ResultScreen({
           공유하러 가요
         </button>
       </div>
+      <AdSlot screen="result" />
     </div>
   )
 }

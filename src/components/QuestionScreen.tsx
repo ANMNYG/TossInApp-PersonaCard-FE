@@ -6,7 +6,6 @@ export interface QuestionScreenProps {
   totalQuestions: number
   selectedElement: ElementType | null
   onSelect: (element: ElementType) => void
-  onExit: () => void
 }
 
 export function QuestionScreen({
@@ -15,7 +14,6 @@ export function QuestionScreen({
   totalQuestions,
   selectedElement,
   onSelect,
-  onExit,
 }: QuestionScreenProps) {
   const progress = (questionIndex / totalQuestions) * 100
 
@@ -25,14 +23,6 @@ export function QuestionScreen({
         <span>
           질문 {questionIndex + 1} / {totalQuestions}
         </span>
-        <button
-          type="button"
-          className="icon-btn"
-          aria-label="처음 화면으로 돌아가기"
-          onClick={onExit}
-        >
-          ✕
-        </button>
       </div>
       <div className="progress">
         <div className="progress-fill" style={{ width: `${progress}%` }} />

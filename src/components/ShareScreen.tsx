@@ -1,37 +1,29 @@
-const SHARE_OPTIONS = [
-  { icon: '💬', shortLabel: '카톡', channelPhrase: '카카오톡으로' },
-  { icon: '📸', shortLabel: '인스타', channelPhrase: '인스타그램으로' },
-  { icon: '🔗', shortLabel: '링크복사', channelPhrase: '링크로' },
-]
+import { AdSlot } from './AdSlot'
 
 export interface ShareScreenProps {
-  onShare: (channelPhrase: string) => void
+  isSharing: boolean
+  onShare: () => void
   onSubscribe: () => void
   onGoHome: () => void
 }
 
-export function ShareScreen({ onShare, onSubscribe, onGoHome }: ShareScreenProps) {
+export function ShareScreen({ isSharing, onShare, onSubscribe, onGoHome }: ShareScreenProps) {
   return (
     <div className="screen screen-share">
-      <div className="eyebrow">공유하고 리롤 받아요</div>
+      <div className="eyebrow">카드 공유</div>
       <h1 className="display display-sm">
-        친구에게 공유하면
+        완성한 카드를
         <br />
-        스타일을 무료로 바꿀 수 있어요
+        친구에게 공유해요
       </h1>
-      <div className="share-grid">
-        {SHARE_OPTIONS.map((opt) => (
-          <button
-            key={opt.channelPhrase}
-            type="button"
-            className="share-opt"
-            onClick={() => onShare(opt.channelPhrase)}
-          >
-            <span className="share-icon">{opt.icon}</span>
-            {opt.shortLabel}
-          </button>
-        ))}
-      </div>
+      <button
+        type="button"
+        className="btn share-cta"
+        onClick={onShare}
+        disabled={isSharing}
+      >
+        {isSharing ? '공유 시트를 여는 중이에요' : '친구에게 카드 공유하기'}
+      </button>
 
       <div className="sub-card">
         <div className="eyebrow">구독</div>
@@ -42,6 +34,8 @@ export function ShareScreen({ onShare, onSubscribe, onGoHome }: ShareScreenProps
           구독 시작하고 매주 새 카드 받아요
         </button>
       </div>
+
+      <AdSlot screen="share" />
 
       <div className="spacer" />
       <button type="button" className="btn-ghost" onClick={onGoHome}>
