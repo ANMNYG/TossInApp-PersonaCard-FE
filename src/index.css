@@ -1,0 +1,32 @@
+:root {
+  --bg: #0f0e1a;
+  --panel: #17162a;
+  --panel-2: #1e1c35;
+  --gold: #c9a227;
+  --gold-soft: #e3c766;
+  --text: #f2efe4;
+  --muted: #8d8aa8;
+  --line: #322f4d;
+  --on-gold: #141221;
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Noto Sans KR', -apple-system, sans-serif;
+}
+
+#root {
+  min-height: 100dvh;
+}
+
+button {
+  font-family: inherit;
+}
