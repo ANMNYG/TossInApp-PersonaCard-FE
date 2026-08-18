@@ -262,6 +262,28 @@
 .result-canvas-locked {
   filter: blur(20px) saturate(0.6);
 }
+.card-loading-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(12, 10, 24, 0.35);
+  border-radius: 16px;
+}
+.card-spinner {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.25);
+  border-top-color: #fff;
+  animation: card-spin 0.8s linear infinite;
+}
+@keyframes card-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
 .lock-overlay {
   position: absolute;
   inset: 0;

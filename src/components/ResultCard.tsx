@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react'
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react'
 import type { Persona } from '../types'
 
 export interface ResultCardProps {
@@ -11,16 +11,25 @@ export interface ResultCardHandle {
   getDataUrl: () => string | null
 }
 
+interface GeneratedImage {
+  mimeType: string
+  base64: string
+}
+
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL
+
 /**
  * 결과 카드 비주얼 컴포넌트예요.
- * 지금은 캔버스로 카드 이미지를 즉석에서 그려서 보여주지만, props 구조(persona, seed)는
- * 그대로 유지한 채 내부 구현만 AI 이미지 생성 API 호출 결과로 교체할 수 있도록 분리해뒀어요.
+ * 마운트되면 백엔드 AI 이미지 생성 API를 호출해서 카드 이미지를 받아와요.
+ * 응답을 받기 전까지는 로딩 표시를, API 호출이 실패하면 기존 캔버스 렌더링을 폴백으로 보여줘요.
  */
 export const ResultCard = forwardRef<ResultCardHandle, ResultCardProps>(function ResultCard(
   { persona, seed, locked = false },
   ref,
 ) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const [image, setImage] = useState<GeneratedImage | null>(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -28,9 +37,57 @@ export const ResultCard = forwardRef<ResultCardHandle, ResultCardProps>(function
     drawPersonaCard(canvas, persona, seed)
   }, [persona, seed])
 
+  useEffect(() => {
+    const controller = new AbortController()
+    setImage(null)
+    setLoading(true)
+
+    async function generateCardImage() {
+      if (!BACKEND_URL) {
+        console.error('VITE_BACKEND_URL이 설정되지 않아서 기본 카드로 대체해요')
+        setLoading(false)
+        return
+      }
+      try {
+        const response = await fetch(`${BACKEND_URL}/api/generate-card`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            element: persona.element,
+            personaTitle: persona.title,
+            colorPrimary: persona.colors[0],
+            colorSecondary: persona.colors[1],
+          }),
+          signal: controller.signal,
+        })
+        if (!response.ok) {
+          throw new Error(`카드 생성 API 응답 오류: ${response.status}`)
+        }
+        const data = await response.json()
+        if (!data?.image?.base64 || !data?.image?.mimeType) {
+          throw new Error('카드 생성 API 응답 형식이 올바르지 않아요')
+        }
+        setImage({ mimeType: data.image.mimeType, base64: data.image.base64 })
+      } catch (error) {
+        if (controller.signal.aborted) return
+        console.error('AI 카드 이미지 생성에 실패해서 기본 카드로 대체해요', error)
+      } finally {
+        if (!controller.signal.aborted) setLoading(false)
+      }
+    }
+
+    void generateCardImage()
+    return () => controller.abort()
+  }, [persona, seed])
+
   useImperativeHandle(ref, () => ({
-    getDataUrl: () => canvasRef.current?.toDataURL('image/png') ?? null,
+    getDataUrl: () => {
+      if (image) return `data:${image.mimeType};base64,${image.base64}`
+      return canvasRef.current?.toDataURL('image/png') ?? null
+    },
   }))
+
+  const cardClassName = locked ? 'result-canvas result-canvas-locked' : 'result-canvas'
 
   return (
     <div className="result-card-wrap">
@@ -38,8 +95,23 @@ export const ResultCard = forwardRef<ResultCardHandle, ResultCardProps>(function
         ref={canvasRef}
         width={480}
         height={640}
-        className={locked ? 'result-canvas result-canvas-locked' : 'result-canvas'}
+        className={cardClassName}
+        style={image ? { display: 'none' } : undefined}
       />
+      {image && (
+        <img
+          src={`data:${image.mimeType};base64,${image.base64}`}
+          alt={`${persona.title} 페르소나 카드`}
+          className={cardClassName}
+        />
+      )}
+
+      {loading && (
+        <div className="card-loading-overlay" aria-hidden="true">
+          <span className="card-spinner" />
+        </div>
+      )}
+
       {locked ? (
         <div className="lock-overlay">
           <span className="lock-icon" aria-hidden="true">
