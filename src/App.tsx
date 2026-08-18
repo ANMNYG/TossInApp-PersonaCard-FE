@@ -111,6 +111,7 @@ function App() {
         <ResultScreen
           persona={persona}
           seed={seed}
+          onShare={handleShare}
           onRetake={startQuiz}
           onGoShare={() => setScreen('share')}
         />

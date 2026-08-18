@@ -259,6 +259,75 @@
   border-radius: 5px;
   letter-spacing: 0.05em;
 }
+.result-canvas-locked {
+  filter: blur(20px) saturate(0.6);
+}
+.lock-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-align: center;
+  padding: 20px;
+}
+.lock-icon {
+  font-size: 26px;
+}
+.lock-text {
+  font-family: monospace;
+  font-size: 11px;
+  letter-spacing: 0.03em;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 6px 12px;
+  border-radius: 20px;
+}
+.persona-info-locked {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 2px 0 20px;
+}
+.skeleton-line {
+  height: 12px;
+  border-radius: 6px;
+  background: var(--line);
+}
+.skeleton-eyebrow {
+  width: 35%;
+  height: 9px;
+}
+.skeleton-title {
+  width: 60%;
+  height: 20px;
+}
+.skeleton-desc {
+  width: 100%;
+}
+.skeleton-desc-short {
+  width: 68%;
+}
+.share-unlock-cta {
+  font-size: 15px;
+  padding: 18px;
+}
+.skip-link {
+  border: none;
+  background: none;
+  color: var(--muted);
+  opacity: 0.65;
+  font-size: 10.5px;
+  text-align: center;
+  padding: 10px;
+  margin-top: 4px;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  align-self: center;
+}
 .persona-title {
   font-family: 'Fraunces', serif;
   font-size: 22px;
@@ -273,7 +342,8 @@
 }
 .btn-row {
   display: flex;
-  gap: 8px;
+  gap: 14px;
+  margin-top: 14px;
 }
 .btn-row .btn-outline {
   flex: 1;

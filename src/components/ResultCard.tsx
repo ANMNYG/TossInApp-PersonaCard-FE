@@ -4,6 +4,7 @@ import type { Persona } from '../types'
 export interface ResultCardProps {
   persona: Persona
   seed: number
+  locked?: boolean
 }
 
 export interface ResultCardHandle {
@@ -16,7 +17,7 @@ export interface ResultCardHandle {
  * 그대로 유지한 채 내부 구현만 AI 이미지 생성 API 호출 결과로 교체할 수 있도록 분리해뒀어요.
  */
 export const ResultCard = forwardRef<ResultCardHandle, ResultCardProps>(function ResultCard(
-  { persona, seed },
+  { persona, seed, locked = false },
   ref,
 ) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -33,8 +34,22 @@ export const ResultCard = forwardRef<ResultCardHandle, ResultCardProps>(function
 
   return (
     <div className="result-card-wrap">
-      <canvas ref={canvasRef} width={480} height={640} className="result-canvas" />
-      <div className="watermark">PERSONA CARD</div>
+      <canvas
+        ref={canvasRef}
+        width={480}
+        height={640}
+        className={locked ? 'result-canvas result-canvas-locked' : 'result-canvas'}
+      />
+      {locked ? (
+        <div className="lock-overlay">
+          <span className="lock-icon" aria-hidden="true">
+            🔒
+          </span>
+          <span className="lock-text">공유하면 카드가 열려요</span>
+        </div>
+      ) : (
+        <div className="watermark">PERSONA CARD</div>
+      )}
     </div>
   )
 })
