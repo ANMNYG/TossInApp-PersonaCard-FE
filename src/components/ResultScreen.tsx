@@ -4,10 +4,14 @@ import type { Persona } from '../types'
 // import { AdSlot } from './AdSlot'
 import { ResultCard, type ResultCardHandle } from './ResultCard'
 
+// Share.sendMessage는 Promise<void>만 반환하고 성공/취소 여부를 알려주지 않아요(fire-and-forget).
+// 그래서 공유 호출이 끝난 뒤에도 시트를 실제로 만졌다 나올 만큼 최소한의 시간차를 둬요.
+const SHARE_SHEET_MIN_DELAY_MS = 1500
+
 export interface ResultScreenProps {
   persona: Persona
   seed: number
-  onShare: () => void
+  onShare: () => Promise<void>
   onRetake: () => void
   onGoShare: () => void
 }
@@ -15,6 +19,7 @@ export interface ResultScreenProps {
 export function ResultScreen({ persona, seed, onShare, onRetake, onGoShare }: ResultScreenProps) {
   const cardRef = useRef<ResultCardHandle>(null)
   const [locked, setLocked] = useState(true)
+  const [sharePending, setSharePending] = useState(false)
 
   const handleSave = () => {
     const dataUrl = cardRef.current?.getDataUrl()
@@ -25,9 +30,12 @@ export function ResultScreen({ persona, seed, onShare, onRetake, onGoShare }: Re
     link.click()
   }
 
-  const handleShareAndUnlock = () => {
+  const handleShareAndUnlock = async () => {
+    setSharePending(true)
+    await onShare()
+    await new Promise((resolve) => setTimeout(resolve, SHARE_SHEET_MIN_DELAY_MS))
+    setSharePending(false)
     setLocked(false)
-    onShare()
   }
 
   return (
@@ -42,8 +50,13 @@ export function ResultScreen({ persona, seed, onShare, onRetake, onGoShare }: Re
             <div className="skeleton-line skeleton-desc" />
             <div className="skeleton-line skeleton-desc skeleton-desc-short" />
           </div>
-          <button type="button" className="btn share-unlock-cta" onClick={handleShareAndUnlock}>
-            공유하고 카드 확인하기
+          <button
+            type="button"
+            className="btn share-unlock-cta"
+            onClick={handleShareAndUnlock}
+            disabled={sharePending}
+          >
+            {sharePending ? '공유 시트를 확인하고 있어요' : '공유하고 카드 확인하기'}
           </button>
           <button type="button" className="skip-link" onClick={() => setLocked(false)}>
             공유 없이 그냥 볼게요
