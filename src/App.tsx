@@ -21,7 +21,6 @@ function App() {
   const [screen, setScreen] = useState<AppScreen>('intro')
   const [questionIndex, setQuestionIndex] = useState(0)
   const [answers, setAnswers] = useState<ElementType[]>([])
-  const [highQuality, setHighQuality] = useState(false)
   const [dialog, setDialog] = useState<DialogState | null>(null)
   const [isSharing, setIsSharing] = useState(false)
 
@@ -32,7 +31,6 @@ function App() {
   const startQuiz = () => {
     setAnswers([])
     setQuestionIndex(0)
-    setHighQuality(false)
     setScreen('question')
   }
 
@@ -113,45 +111,13 @@ function App() {
         <ResultScreen
           persona={persona}
           seed={seed}
-          highQuality={highQuality}
-          onSave={() => setDialog({ kind: 'payment' })}
           onRetake={startQuiz}
           onGoShare={() => setScreen('share')}
         />
       )}
 
       {screen === 'share' && (
-        <ShareScreen
-          isSharing={isSharing}
-          onShare={handleShare}
-          onSubscribe={() => setDialog({ kind: 'subscription' })}
-          onGoHome={() => setScreen('intro')}
-        />
-      )}
-
-      {dialog?.kind === 'payment' && (
-        <Dialog
-          eyebrow="결제 시뮬레이션"
-          title="고화질 카드를 저장해요"
-          description="500원을 결제하면 워터마크 없는 고화질 카드를 저장할 수 있어요. 지금은 흐름만 확인하는 프로토타입이에요."
-          onClose={() => setDialog(null)}
-          primaryLabel="500원 결제하고 저장해요"
-          onPrimary={() => {
-            setHighQuality(true)
-            setDialog(null)
-          }}
-        />
-      )}
-
-      {dialog?.kind === 'subscription' && (
-        <Dialog
-          eyebrow="구독 시뮬레이션"
-          title="매주 새 테마 카드를 받아요"
-          description="구독하면 매주 새로운 테마로 카드를 받을 수 있어요. 지금은 흐름만 확인하는 프로토타입이에요."
-          onClose={() => setDialog(null)}
-          primaryLabel="구독 시작하고 진행해요"
-          onPrimary={() => setDialog(null)}
-        />
+        <ShareScreen isSharing={isSharing} onShare={handleShare} onGoHome={() => setScreen('intro')} />
       )}
 
       {dialog?.kind === 'share-error' && (

@@ -20,7 +20,4 @@ export interface Persona {
   description: string
 }
 
-export type DialogState =
-  | { kind: 'payment' }
-  | { kind: 'subscription' }
-  | { kind: 'share-error' }
+export type DialogState = { kind: 'share-error' }

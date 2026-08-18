@@ -1,13 +1,13 @@
-import { AdSlot } from './AdSlot'
+// 광고 붙이기 전까지 임시 비활성화. 다시 켤 때는 아래 import와 <AdSlot />을 되살리세요.
+// import { AdSlot } from './AdSlot'
 
 export interface ShareScreenProps {
   isSharing: boolean
   onShare: () => void
-  onSubscribe: () => void
   onGoHome: () => void
 }
 
-export function ShareScreen({ isSharing, onShare, onSubscribe, onGoHome }: ShareScreenProps) {
+export function ShareScreen({ isSharing, onShare, onGoHome }: ShareScreenProps) {
   return (
     <div className="screen screen-share">
       <div className="eyebrow">카드 공유</div>
@@ -25,17 +25,7 @@ export function ShareScreen({ isSharing, onShare, onSubscribe, onGoHome }: Share
         {isSharing ? '공유 시트를 여는 중이에요' : '친구에게 카드 공유하기'}
       </button>
 
-      <div className="sub-card">
-        <div className="eyebrow">구독</div>
-        <div className="sub-price">
-          매주 새 테마 카드 <span>월 4,900원</span>
-        </div>
-        <button type="button" className="btn-outline sub-cta" onClick={onSubscribe}>
-          구독 시작하고 매주 새 카드 받아요
-        </button>
-      </div>
-
-      <AdSlot screen="share" />
+      {/* <AdSlot screen="share" /> */}
 
       <div className="spacer" />
       <button type="button" className="btn-ghost" onClick={onGoHome}>

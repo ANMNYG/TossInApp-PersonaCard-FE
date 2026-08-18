@@ -283,29 +283,6 @@
 .share-cta {
   margin-bottom: 18px;
 }
-.sub-card {
-  border: 1px solid var(--gold);
-  border-radius: 16px;
-  padding: 16px;
-  background: linear-gradient(160deg, rgba(201, 162, 39, 0.12), transparent);
-  margin-bottom: 14px;
-}
-.sub-card .eyebrow {
-  margin-bottom: 4px;
-}
-.sub-price {
-  font-family: 'Fraunces', serif;
-  font-size: 19px;
-  margin: 4px 0 10px;
-}
-.sub-price span {
-  font-size: 11px;
-  color: var(--muted);
-  font-family: 'Noto Sans KR';
-}
-.sub-cta {
-  width: 100%;
-}
 
 /* ---- dialog ---- */
 .dialog-overlay {

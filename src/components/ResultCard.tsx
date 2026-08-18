@@ -1,18 +1,24 @@
-import { useEffect, useRef } from 'react'
+import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react'
 import type { Persona } from '../types'
 
 export interface ResultCardProps {
   persona: Persona
   seed: number
-  highQuality: boolean
+}
+
+export interface ResultCardHandle {
+  getDataUrl: () => string | null
 }
 
 /**
  * 결과 카드 비주얼 컴포넌트예요.
- * 지금은 캔버스로 카드 이미지를 즉석에서 그려서 보여주지만, props 구조(persona, seed, highQuality)는
+ * 지금은 캔버스로 카드 이미지를 즉석에서 그려서 보여주지만, props 구조(persona, seed)는
  * 그대로 유지한 채 내부 구현만 AI 이미지 생성 API 호출 결과로 교체할 수 있도록 분리해뒀어요.
  */
-export function ResultCard({ persona, seed, highQuality }: ResultCardProps) {
+export const ResultCard = forwardRef<ResultCardHandle, ResultCardProps>(function ResultCard(
+  { persona, seed },
+  ref,
+) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
@@ -21,15 +27,17 @@ export function ResultCard({ persona, seed, highQuality }: ResultCardProps) {
     drawPersonaCard(canvas, persona, seed)
   }, [persona, seed])
 
+  useImperativeHandle(ref, () => ({
+    getDataUrl: () => canvasRef.current?.toDataURL('image/png') ?? null,
+  }))
+
   return (
     <div className="result-card-wrap">
       <canvas ref={canvasRef} width={480} height={640} className="result-canvas" />
-      <div className="watermark">
-        {highQuality ? 'PERSONA CARD · 고화질' : 'PERSONA CARD · 무료버전'}
-      </div>
+      <div className="watermark">PERSONA CARD</div>
     </div>
   )
-}
+})
 
 function drawPersonaCard(canvas: HTMLCanvasElement, persona: Persona, seed: number) {
   const ctx = canvas.getContext('2d')
