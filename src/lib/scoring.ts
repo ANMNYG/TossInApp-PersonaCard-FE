@@ -52,3 +52,25 @@ export function computeSeed(scores: ElementScores): number {
     0,
   )
 }
+
+export interface QuizResult {
+  /** 질문별로 사용자가 실제 선택한 원소예요(인덱스 = 질문 순서). "왜 이 결과가 나왔는지" 해설에 써요. */
+  answers: ElementType[]
+  scores: ElementScores
+  ranking: ElementRanking
+  personaKey: PersonaTypeKey
+  seed: number
+}
+
+/** 답변으로부터 점수·랭킹·타입·시드를 한 번에 계산하고, 원본 답변 이력도 함께 담아 반환해요. */
+export function computeResult(answers: ElementType[]): QuizResult {
+  const scores = computeScores(answers)
+  const ranking = rankElements(scores)
+  return {
+    answers,
+    scores,
+    ranking,
+    personaKey: getPersonaTypeKey(scores),
+    seed: computeSeed(scores),
+  }
+}
