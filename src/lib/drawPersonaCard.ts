@@ -26,6 +26,28 @@ function withAlpha(hex: string, alphaHex: string) {
   return `${hex}${alphaHex}`
 }
 
+function hexToRgb(hex: string) {
+  return {
+    r: Number.parseInt(hex.slice(1, 3), 16),
+    g: Number.parseInt(hex.slice(3, 5), 16),
+    b: Number.parseInt(hex.slice(5, 7), 16),
+  }
+}
+
+function toHexByte(n: number) {
+  return Math.max(0, Math.min(255, Math.round(n)))
+    .toString(16)
+    .padStart(2, '0')
+}
+
+/** 두 색을 스크린 블렌드로 섞어서, 원본보다 밝고 화사한 "만남의 색"을 만들어요. */
+function screenBlendColors(hexA: string, hexB: string) {
+  const a = hexToRgb(hexA)
+  const b = hexToRgb(hexB)
+  const screen = (ca: number, cb: number) => 255 - ((255 - ca) * (255 - cb)) / 255
+  return `#${toHexByte(screen(a.r, b.r))}${toHexByte(screen(a.g, b.g))}${toHexByte(screen(a.b, b.b))}`
+}
+
 /** 주원소색 + 보조원소색을 번갈아 쓰는 은은한 radial blur 블롭 배경이에요. */
 function drawBackground(
   ctx: CanvasRenderingContext2D,
@@ -80,56 +102,120 @@ function pathHexagon(ctx: CanvasRenderingContext2D, r: number, rotation: number)
   ctx.closePath()
 }
 
+/** 배경 위에 중앙 도형이 확실히 도드라지도록, 도형 자리 뒤를 은은하게 어둡게 눌러줘요. */
+function drawEmblemVignette(ctx: CanvasRenderingContext2D, cx: number, cy: number) {
+  ctx.save()
+  const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 168)
+  grad.addColorStop(0, 'rgba(6,5,14,0.6)')
+  grad.addColorStop(0.7, 'rgba(6,5,14,0.28)')
+  grad.addColorStop(1, 'rgba(6,5,14,0)')
+  ctx.fillStyle = grad
+  ctx.fillRect(cx - 200, cy - 200, 400, 400)
+  ctx.restore()
+}
+
+/** 큰 반경으로 흐릿하게 번지는 halo 패스 + 얇고 선명한 core 패스, 두 겹으로 그려서 네온처럼 부각시켜요. */
+function drawGlowingStroke(
+  ctx: CanvasRenderingContext2D,
+  buildPath: () => void,
+  color: string,
+) {
+  ctx.save()
+  ctx.strokeStyle = color
+  ctx.shadowColor = color
+  ctx.shadowBlur = 38
+  ctx.lineWidth = 7
+  ctx.globalAlpha = 0.45
+  buildPath()
+  ctx.stroke()
+  ctx.restore()
+
+  ctx.save()
+  ctx.strokeStyle = color
+  ctx.shadowColor = color
+  ctx.shadowBlur = 18
+  ctx.lineWidth = 3.5
+  ctx.globalAlpha = 1
+  buildPath()
+  ctx.stroke()
+  ctx.restore()
+
+  ctx.save()
+  ctx.strokeStyle = '#ffffff'
+  ctx.shadowBlur = 0
+  ctx.lineWidth = 1
+  ctx.globalAlpha = 0.5
+  buildPath()
+  ctx.stroke()
+  ctx.restore()
+}
+
+const EMBLEM_DIAMOND_RADIUS = 84
+const EMBLEM_HEX_RADIUS = 50
+const EMBLEM_HEX_OFFSET = { x: 14, y: 18 }
+const EMBLEM_HEX_ROTATION = Math.PI / 6
+
 /**
- * 순수형은 다이아몬드 하나만, 혼합형은 다이아몬드(주원소) 안에 육각형(보조원소)이
- * 살짝 겹치는 형태로 그려서 두 원소가 조합된 느낌을 살려요.
+ * 순수형은 채워진 다이아몬드 하나를, 혼합형은 다이아몬드(주원소)와 육각형(보조원소)이
+ * 겹치는 형태로 그려요. 혼합형은 두 도형이 실제로 겹치는 자리를 계산해서 주+보조 원소색을
+ * 섞은 밝은 색으로 채워, "두 원소가 만나는 지점"이 도드라지게 해요.
  */
 function drawEmblem(ctx: CanvasRenderingContext2D, persona: Persona, w: number, h: number) {
   const cx = w / 2
   const cy = h * 0.4
   const isPure = persona.secondary === null
 
+  drawEmblemVignette(ctx, cx, cy)
+
   ctx.save()
   ctx.translate(cx, cy)
 
   if (isPure) {
-    ctx.save()
-    ctx.shadowColor = persona.colors[1]
-    ctx.shadowBlur = 30
-    ctx.strokeStyle = persona.colors[0]
-    ctx.lineWidth = 2.5
-    ctx.globalAlpha = 0.95
-    pathDiamond(ctx, 80)
-    ctx.stroke()
-    ctx.restore()
+    const r = EMBLEM_DIAMOND_RADIUS
 
     ctx.save()
-    ctx.strokeStyle = persona.colors[1]
+    const fill = ctx.createRadialGradient(0, -r * 0.15, 0, 0, 0, r)
+    fill.addColorStop(0, withAlpha(persona.colors[1], '77'))
+    fill.addColorStop(0.55, withAlpha(persona.colors[0], '33'))
+    fill.addColorStop(1, withAlpha(persona.colors[0], '00'))
+    ctx.fillStyle = fill
+    pathDiamond(ctx, r)
+    ctx.fill()
+    ctx.restore()
+
+    drawGlowingStroke(ctx, () => pathDiamond(ctx, r), persona.colors[0])
+
+    ctx.save()
+    ctx.rotate(Math.PI / 4)
+    ctx.strokeStyle = 'rgba(255,255,255,0.3)'
     ctx.lineWidth = 1
-    ctx.globalAlpha = 0.35
-    pathDiamond(ctx, 56)
+    pathDiamond(ctx, r * 0.48)
     ctx.stroke()
     ctx.restore()
   } else {
+    const rDiamond = EMBLEM_DIAMOND_RADIUS
+    const rHex = EMBLEM_HEX_RADIUS
+    const meetColor = screenBlendColors(persona.colors[0], persona.colors[1])
+
+    // 다이아몬드와 육각형이 겹치는 부분만 클립으로 잘라내서 "만남의 색"으로 채워요.
     ctx.save()
-    ctx.shadowColor = persona.colors[0]
-    ctx.shadowBlur = 26
-    ctx.strokeStyle = persona.colors[0]
-    ctx.lineWidth = 2.5
-    ctx.globalAlpha = 0.9
-    pathDiamond(ctx, 80)
-    ctx.stroke()
+    pathDiamond(ctx, rDiamond)
+    ctx.clip()
+    ctx.save()
+    ctx.translate(EMBLEM_HEX_OFFSET.x, EMBLEM_HEX_OFFSET.y)
+    ctx.shadowColor = meetColor
+    ctx.shadowBlur = 34
+    ctx.fillStyle = withAlpha(meetColor, 'aa')
+    pathHexagon(ctx, rHex, EMBLEM_HEX_ROTATION)
+    ctx.fill()
+    ctx.restore()
     ctx.restore()
 
+    drawGlowingStroke(ctx, () => pathDiamond(ctx, rDiamond), persona.colors[0])
+
     ctx.save()
-    ctx.translate(12, 16)
-    ctx.shadowColor = persona.colors[1]
-    ctx.shadowBlur = 22
-    ctx.strokeStyle = persona.colors[1]
-    ctx.lineWidth = 2
-    ctx.globalAlpha = 0.85
-    pathHexagon(ctx, 46, Math.PI / 6)
-    ctx.stroke()
+    ctx.translate(EMBLEM_HEX_OFFSET.x, EMBLEM_HEX_OFFSET.y)
+    drawGlowingStroke(ctx, () => pathHexagon(ctx, rHex, EMBLEM_HEX_ROTATION), persona.colors[1])
     ctx.restore()
   }
 
