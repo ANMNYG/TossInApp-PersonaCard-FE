@@ -1,8 +1,9 @@
 import { useRef, useState } from 'react'
-import type { Persona } from '../types'
+import type { ElementType, Persona } from '../types'
 // 광고 붙이기 전까지 임시 비활성화. 다시 켤 때는 아래 import와 <AdSlot />을 되살리세요.
 // import { AdSlot } from './AdSlot'
 import { ResultCard, type ResultCardHandle } from './ResultCard'
+import { ResultInterpretation } from './ResultInterpretation'
 
 // Share.sendMessage는 Promise<void>만 반환하고 성공/취소 여부를 알려주지 않아요(fire-and-forget).
 // 그래서 공유 호출이 끝난 뒤에도 시트를 실제로 만졌다 나올 만큼 최소한의 시간차를 둬요.
@@ -11,12 +12,20 @@ const SHARE_SHEET_MIN_DELAY_MS = 1500
 export interface ResultScreenProps {
   persona: Persona
   seed: number
+  answers: ElementType[]
   onShare: () => Promise<void>
   onRetake: () => void
   onGoShare: () => void
 }
 
-export function ResultScreen({ persona, seed, onShare, onRetake, onGoShare }: ResultScreenProps) {
+export function ResultScreen({
+  persona,
+  seed,
+  answers,
+  onShare,
+  onRetake,
+  onGoShare,
+}: ResultScreenProps) {
   const cardRef = useRef<ResultCardHandle>(null)
   const [locked, setLocked] = useState(true)
   const [sharePending, setSharePending] = useState(false)
@@ -67,6 +76,7 @@ export function ResultScreen({ persona, seed, onShare, onRetake, onGoShare }: Re
           <div className="eyebrow">{persona.tagEn}</div>
           <div className="persona-title">{persona.title}</div>
           <p className="persona-desc">{persona.description}</p>
+          <ResultInterpretation persona={persona} answers={answers} />
           <button type="button" className="btn" onClick={handleSave}>
             고화질로 저장해요
           </button>

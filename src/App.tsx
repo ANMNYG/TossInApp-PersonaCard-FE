@@ -9,7 +9,7 @@ import { ResultScreen } from './components/ResultScreen'
 import { ShareScreen } from './components/ShareScreen'
 import { PERSONAS } from './data/personas'
 import { QUESTIONS } from './data/questions'
-import { computeScores, computeSeed, getTopElement } from './lib/scoring'
+import { computeResult } from './lib/scoring'
 import type { DialogState, ElementType } from './types'
 
 type AppScreen = 'intro' | 'question' | 'loading' | 'result' | 'share'
@@ -24,9 +24,8 @@ function App() {
   const [dialog, setDialog] = useState<DialogState | null>(null)
   const [isSharing, setIsSharing] = useState(false)
 
-  const scores = useMemo(() => computeScores(answers), [answers])
-  const persona = useMemo(() => PERSONAS[getTopElement(scores)], [scores])
-  const seed = useMemo(() => computeSeed(scores), [scores])
+  const result = useMemo(() => computeResult(answers), [answers])
+  const persona = useMemo(() => PERSONAS[result.personaKey], [result.personaKey])
 
   const startQuiz = () => {
     setAnswers([])
@@ -110,7 +109,8 @@ function App() {
       {screen === 'result' && (
         <ResultScreen
           persona={persona}
-          seed={seed}
+          seed={result.seed}
+          answers={result.answers}
           onShare={handleShare}
           onRetake={startQuiz}
           onGoShare={() => setScreen('share')}

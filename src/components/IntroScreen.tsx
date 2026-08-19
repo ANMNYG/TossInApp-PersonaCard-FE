@@ -1,8 +1,20 @@
+import { useEffect, useRef } from 'react'
+import { drawBrandSignature } from '../lib/drawPersonaCard'
+import { StatusLine } from './StatusLine'
+
 export interface IntroScreenProps {
   onStart: () => void
 }
 
 export function IntroScreen({ onStart }: IntroScreenProps) {
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    drawBrandSignature(canvas)
+  }, [])
+
   return (
     <div className="screen screen-intro">
       <div className="eyebrow">✦ AI 페르소나 카드</div>
@@ -12,7 +24,7 @@ export function IntroScreen({ onStart }: IntroScreenProps) {
         나의 원소 카드를 만나요
       </h1>
       <div className="card-preview">
-        <span>예시 카드</span>
+        <canvas ref={canvasRef} width={480} height={640} className="card-preview-canvas" />
       </div>
       <div className="tags">
         <span className="tag">1분 완성</span>
@@ -23,7 +35,7 @@ export function IntroScreen({ onStart }: IntroScreenProps) {
       <button type="button" className="btn" onClick={onStart}>
         지금 카드 만들어봐요
       </button>
-      <div className="liveline">오늘 12,384명이 자신의 카드를 만들었어요</div>
+      <StatusLine />
     </div>
   )
 }
