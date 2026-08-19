@@ -99,22 +99,14 @@
   aspect-ratio: 3 / 4;
   border-radius: 16px;
   border: 1px solid var(--line);
-  background:
-    radial-gradient(circle at 30% 20%, rgba(226, 87, 44, 0.55), transparent 60%),
-    radial-gradient(circle at 70% 80%, rgba(183, 156, 232, 0.35), transparent 55%),
-    linear-gradient(160deg, #241f3d, #120f22);
   margin-bottom: 16px;
   position: relative;
   overflow: hidden;
-  display: flex;
-  align-items: flex-end;
 }
-.card-preview span {
-  font-family: monospace;
-  font-size: 10px;
-  color: rgba(255, 255, 255, 0.55);
-  letter-spacing: 0.05em;
-  padding: 12px;
+.card-preview-canvas {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  display: block;
 }
 
 .tags {
@@ -261,28 +253,6 @@
 }
 .result-canvas-locked {
   filter: blur(20px) saturate(0.6);
-}
-.card-loading-overlay {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(12, 10, 24, 0.35);
-  border-radius: 16px;
-}
-.card-spinner {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  border: 3px solid rgba(255, 255, 255, 0.25);
-  border-top-color: #fff;
-  animation: card-spin 0.8s linear infinite;
-}
-@keyframes card-spin {
-  to {
-    transform: rotate(360deg);
-  }
 }
 .lock-overlay {
   position: absolute;

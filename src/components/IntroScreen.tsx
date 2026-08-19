@@ -1,8 +1,24 @@
+import { useEffect, useRef } from 'react'
+import { drawPersonaCard } from '../lib/drawPersonaCard'
+import { PERSONAS } from '../data/personas'
+
 export interface IntroScreenProps {
   onStart: () => void
 }
 
+// 인트로에서 보여줄 예시 카드예요. 혼합형(뜨거운 파도)을 골라서 16타입 조합 느낌을 미리 보여줘요.
+const PREVIEW_PERSONA = PERSONAS['fire-water']
+const PREVIEW_SEED = 1234
+
 export function IntroScreen({ onStart }: IntroScreenProps) {
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    drawPersonaCard(canvas, PREVIEW_PERSONA, PREVIEW_SEED)
+  }, [])
+
   return (
     <div className="screen screen-intro">
       <div className="eyebrow">✦ AI 페르소나 카드</div>
@@ -12,7 +28,7 @@ export function IntroScreen({ onStart }: IntroScreenProps) {
         나의 원소 카드를 만나요
       </h1>
       <div className="card-preview">
-        <span>예시 카드</span>
+        <canvas ref={canvasRef} width={480} height={640} className="card-preview-canvas" />
       </div>
       <div className="tags">
         <span className="tag">1분 완성</span>
