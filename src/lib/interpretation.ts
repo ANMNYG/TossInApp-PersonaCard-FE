@@ -28,16 +28,23 @@ export function elementIcon(element: ElementType): string {
   return ELEMENT_ICON[element]
 }
 
-/** 질문마다 뭘 물어보는지 짧게 요약한 이름이에요. QUESTIONS와 같은 순서예요. */
-const QUESTION_THEMES = [
-  '에너지 표현',
-  '휴식 방식',
-  '관계 속 역할',
-  '스트레스 대처',
-  '끌리는 색감',
-  '추구하는 관계',
-  '필요한 한마디',
+/**
+ * 질문마다 자연스러운 문장으로 이어지는 도입부예요. QUESTIONS와 같은 순서고,
+ * 뒤에 "'선택한 답변'를 고르셨어요" 형태로 붙어요 (예: "쉬는 날엔 '훌쩍 즉흥 여행을
+ * 떠나요'를 고르셨어요").
+ */
+const LEAD_IN = [
+  '평소 에너지는',
+  '쉬는 날엔',
+  '친구들 사이에서는',
+  '스트레스 받을 땐',
+  '좋아하는 색감은',
+  '관계에서는',
+  '지금 필요한 한마디로는',
 ] as const
+
+/** 한 문장에 너무 많은 답변을 나열하지 않도록, 원소당 최대 이 개수만 인용해요. */
+const MAX_QUOTED_ANSWERS = 2
 
 const PURE_ESSENCE: Record<ElementType, string> = {
   fire: '불 하나로 가득 채워진, 흔들림 없는 뜨거움이에요.',
@@ -135,15 +142,6 @@ const TYPE_INSIGHTS: Record<PersonaTypeKey, TypeInsight> = {
   },
 }
 
-const MAX_LISTED_QUESTIONS = 3
-
-function describeIndices(indices: number[]): string {
-  const shown = indices.slice(0, MAX_LISTED_QUESTIONS)
-  const label = shown.map((i) => `${QUESTION_THEMES[i]}(${i + 1}번)`).join(', ')
-  const rest = indices.length - shown.length
-  return rest > 0 ? `${label} 외 ${rest}개` : label
-}
-
 function indicesFor(answers: ElementType[], element: ElementType): number[] {
   return answers.reduce<number[]>((acc, answer, index) => {
     if (answer === element) acc.push(index)
@@ -151,23 +149,39 @@ function indicesFor(answers: ElementType[], element: ElementType): number[] {
   }, [])
 }
 
+/** 라벨을 인용부호로 감싸요. Q7 선택지처럼 이미 큰따옴표를 품고 있으면 그대로 둬요. */
+function quoteAnswer(label: string): string {
+  return label.startsWith('"') ? label : `'${label}'`
+}
+
+function labelAt(questionIndex: number, element: ElementType): string {
+  const option = QUESTIONS[questionIndex].options.find((o) => o.element === element)
+  return option ? option.label : ''
+}
+
+/**
+ * 특정 원소를 고른 질문들을, 실제로 선택한 답변 문장을 그대로 인용하는 자연스러운
+ * 한 문장으로 묶어요 (예: "쉬는 날엔 '훌쩍 즉흥 여행을 떠나요'를, 관계에서는
+ * '서로의 자유를 존중하는 사이예요'를 고르셨어요").
+ */
+function buildElementClause(indices: number[], element: ElementType): string {
+  const parts = indices
+    .slice(0, MAX_QUOTED_ANSWERS)
+    .map((i) => `${LEAD_IN[i]} ${quoteAnswer(labelAt(i, element))}를`)
+  return `${parts.join(', ')} 고르셨어요.`
+}
+
 function buildBasis(persona: Persona, answers: ElementType[]): string {
-  const primaryIndices = indicesFor(answers, persona.primary)
+  const primaryClause = buildElementClause(indicesFor(answers, persona.primary), persona.primary)
 
   if (!persona.secondary) {
-    const essence = PURE_ESSENCE[persona.primary]
-    if (primaryIndices.length === 0) return essence
-    return `${describeIndices(primaryIndices)} 질문에서 모두 ${ELEMENT_NOUN[persona.primary]}의 답을 선택하셨어요. ${essence}`
+    return `${primaryClause} ${PURE_ESSENCE[persona.primary]}`
   }
 
-  const secondaryIndices = indicesFor(answers, persona.secondary)
+  const secondaryClause = buildElementClause(indicesFor(answers, persona.secondary), persona.secondary)
   const essence = MIXED_ESSENCE[persona.key] ?? ''
 
-  if (primaryIndices.length === 0 || secondaryIndices.length === 0) {
-    return essence
-  }
-
-  return `${describeIndices(primaryIndices)} 질문에서는 ${ELEMENT_NOUN[persona.primary]}의 답을, ${describeIndices(secondaryIndices)} 질문에서는 ${ELEMENT_NOUN[persona.secondary]}의 답을 선택하셨어요. ${essence}`
+  return `${primaryClause} 반면 ${secondaryClause} ${essence}`
 }
 
 function buildOpposite(persona: Persona): string {
@@ -207,6 +221,6 @@ export function buildInterpretation(persona: Persona, answers: ElementType[]): I
   }
 }
 
-if (import.meta.env.DEV && QUESTION_THEMES.length !== QUESTIONS.length) {
-  console.error('QUESTION_THEMES와 QUESTIONS의 개수가 달라요. 질문이 추가/삭제되면 같이 맞춰주세요.')
+if (import.meta.env.DEV && LEAD_IN.length !== QUESTIONS.length) {
+  console.error('LEAD_IN과 QUESTIONS의 개수가 달라요. 질문이 추가/삭제되면 같이 맞춰주세요.')
 }
