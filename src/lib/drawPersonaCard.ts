@@ -1,3 +1,4 @@
+import { ELEMENT_COLOR } from '../data/personas'
 import type { ElementType, Persona } from '../types'
 
 const GOLD = '#c9a227'
@@ -75,6 +76,83 @@ export function drawCardBack(canvas: HTMLCanvasElement) {
   ctx.restore()
 
   drawFrame(ctx, w, h)
+}
+
+const BRAND_ELEMENT_LAYOUT: Array<{ element: ElementType; angle: number }> = [
+  { element: 'fire', angle: -Math.PI / 2 },
+  { element: 'air', angle: 0 },
+  { element: 'earth', angle: Math.PI / 2 },
+  { element: 'water', angle: Math.PI },
+]
+
+/**
+ * 인트로 화면에 항상 고정으로 보여주는 시그니처 이미지예요. 특정 결과 타입이 아니라
+ * 4원소 심볼을 나침반처럼 모두 배치해서 앱을 대표하는 이미지로 써요. 시드/원소 조합이
+ * 없어서 매번 정확히 같은 모습으로 그려져요.
+ */
+export function drawBrandSignature(canvas: HTMLCanvasElement) {
+  const ctx = canvas.getContext('2d')
+  if (!ctx) return
+  const w = canvas.width
+  const h = canvas.height
+  ctx.clearRect(0, 0, w, h)
+
+  const bgGrad = ctx.createLinearGradient(0, 0, w, h)
+  bgGrad.addColorStop(0, '#171130')
+  bgGrad.addColorStop(1, '#0a0815')
+  ctx.fillStyle = bgGrad
+  ctx.fillRect(0, 0, w, h)
+
+  drawStarField(ctx, w, h, 7)
+
+  const cx = w / 2
+  const cy = h * 0.44
+  drawEmblemVignette(ctx, cx, cy)
+
+  ctx.save()
+  ctx.translate(cx, cy)
+
+  ctx.save()
+  ctx.strokeStyle = withAlpha(GOLD_LIGHT, '45')
+  ctx.lineWidth = 1
+  ctx.beginPath()
+  ctx.arc(0, 0, 96, 0, Math.PI * 2)
+  ctx.stroke()
+  ctx.restore()
+
+  const orbitRadius = 96
+  const symbolRadius = 30
+  for (const { element, angle } of BRAND_ELEMENT_LAYOUT) {
+    ctx.save()
+    ctx.translate(Math.cos(angle) * orbitRadius, Math.sin(angle) * orbitRadius)
+    drawElementSymbol(ctx, element, symbolRadius, ELEMENT_COLOR[element])
+    ctx.restore()
+  }
+
+  ctx.save()
+  ctx.fillStyle = GOLD_LIGHT
+  ctx.shadowColor = GOLD
+  ctx.shadowBlur = 20
+  pathSparkleStar(ctx, 15)
+  ctx.fill()
+  ctx.restore()
+
+  ctx.restore()
+
+  drawFrame(ctx, w, h)
+
+  ctx.save()
+  ctx.textAlign = 'center'
+  ctx.font = '11px monospace'
+  ctx.fillStyle = withAlpha(GOLD_LIGHT, 'cc')
+  ctx.fillText('FIRE · WATER · EARTH · AIR', w / 2, h - 50)
+  ctx.font = "600 22px 'Fraunces', serif"
+  ctx.fillStyle = 'rgba(255,255,255,0.96)'
+  ctx.shadowColor = GOLD
+  ctx.shadowBlur = 12
+  ctx.fillText('AI 페르소나 카드', w / 2, h - 26)
+  ctx.shadowBlur = 0
+  ctx.restore()
 }
 
 function seededRandom(seed: number, offset: number) {

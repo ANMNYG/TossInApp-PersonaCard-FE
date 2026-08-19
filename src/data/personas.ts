@@ -1,7 +1,7 @@
 import type { ElementType, Persona, PersonaTypeKey } from '../types'
 
 /** 각 원소의 기본 색상이에요. 혼합형은 주원소색 + 보조원소색을 그대로 이어붙여서 그라데이션을 만들어요. */
-const ELEMENT_COLOR: Record<ElementType, string> = {
+export const ELEMENT_COLOR: Record<ElementType, string> = {
   fire: '#e2572c',
   water: '#2c8ce2',
   earth: '#5a9153',

@@ -1,14 +1,10 @@
 import { useEffect, useRef } from 'react'
-import { drawPersonaCard } from '../lib/drawPersonaCard'
-import { PERSONAS } from '../data/personas'
+import { drawBrandSignature } from '../lib/drawPersonaCard'
+import { StatusLine } from './StatusLine'
 
 export interface IntroScreenProps {
   onStart: () => void
 }
-
-// 인트로에서 보여줄 예시 카드예요. 혼합형(뜨거운 파도)을 골라서 16타입 조합 느낌을 미리 보여줘요.
-const PREVIEW_PERSONA = PERSONAS['fire-water']
-const PREVIEW_SEED = 1234
 
 export function IntroScreen({ onStart }: IntroScreenProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -16,7 +12,7 @@ export function IntroScreen({ onStart }: IntroScreenProps) {
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
-    drawPersonaCard(canvas, PREVIEW_PERSONA, PREVIEW_SEED)
+    drawBrandSignature(canvas)
   }, [])
 
   return (
@@ -39,7 +35,7 @@ export function IntroScreen({ onStart }: IntroScreenProps) {
       <button type="button" className="btn" onClick={onStart}>
         지금 카드 만들어봐요
       </button>
-      <div className="liveline">오늘 12,384명이 자신의 카드를 만들었어요</div>
+      <StatusLine />
     </div>
   )
 }
