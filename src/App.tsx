@@ -31,6 +31,9 @@ function App() {
   const [referralCode] = useState<string | null>(() => getReferralCodeFromUrl())
   const [sharerCode, setSharerCode] = useState<string | null>(() => getStoredSharerCode())
   const [chemistry, setChemistry] = useState<ChemistryVisitState>({ status: 'idle' })
+  // 닉네임 입력/건너뛰기를 아직 선택하지 않았으면 null이에요. 케미 조회는 이 선택 이후에 시작해요.
+  const [visitorNickname, setVisitorNickname] = useState<string | null>(null)
+  const [nicknameDecided, setNicknameDecided] = useState(false)
 
   const result = useMemo(() => computeResult(answers), [answers])
   const persona = useMemo(() => PERSONAS[result.personaKey], [result.personaKey])
@@ -39,23 +42,36 @@ function App() {
     setAnswers([])
     setQuestionIndex(0)
     setChemistry({ status: 'idle' })
+    setVisitorNickname(null)
+    setNicknameDecided(false)
     setScreen('question')
   }
 
-  // 친구 링크로 들어온 상태에서 카드를 완성하면(결과 화면 도달) 케미 조회를 한 번 호출해요.
+  // 친구 링크로 들어온 상태에서 카드를 완성하고(결과 화면 도달) 닉네임을 선택하면 케미 조회를 한 번 호출해요.
   useEffect(() => {
     if (screen !== 'result') return
     if (!referralCode) return
+    if (!nicknameDecided) return
     if (chemistry.status !== 'idle') return
 
     setChemistry({ status: 'loading' })
-    visitChemistry(referralCode, persona.key)
+    visitChemistry(referralCode, persona.key, visitorNickname)
       .then((data) => setChemistry({ status: 'success', data }))
       .catch((error: unknown) => {
         console.error('케미 결과를 확인하지 못했어요', error)
         setChemistry({ status: 'error' })
       })
-  }, [screen, referralCode, persona.key, chemistry.status])
+  }, [screen, referralCode, persona.key, chemistry.status, nicknameDecided, visitorNickname])
+
+  const handleNicknameSubmit = (nickname: string) => {
+    setVisitorNickname(nickname)
+    setNicknameDecided(true)
+  }
+
+  const handleNicknameSkip = () => {
+    setVisitorNickname(null)
+    setNicknameDecided(true)
+  }
 
   const selectAnswer = (element: ElementType) => {
     const nextAnswers = [...answers, element]
@@ -157,6 +173,9 @@ function App() {
           onRetake={startQuiz}
           onGoShare={() => setScreen('share')}
           chemistry={chemistry}
+          needsNickname={!!referralCode && !nicknameDecided}
+          onSubmitNickname={handleNicknameSubmit}
+          onSkipNickname={handleNicknameSkip}
         />
       )}
 
