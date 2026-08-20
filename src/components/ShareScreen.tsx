@@ -5,9 +5,18 @@ export interface ShareScreenProps {
   isSharing: boolean
   onShare: () => void
   onGoHome: () => void
+  /** localStorage에 저장된 케미 공유 코드가 있을 때만 "내 케미 모아보기" 버튼을 보여줘요. */
+  hasSharerCode: boolean
+  onGoMyChemistry: () => void
 }
 
-export function ShareScreen({ isSharing, onShare, onGoHome }: ShareScreenProps) {
+export function ShareScreen({
+  isSharing,
+  onShare,
+  onGoHome,
+  hasSharerCode,
+  onGoMyChemistry,
+}: ShareScreenProps) {
   return (
     <div className="screen screen-share">
       <div className="eyebrow">카드 공유</div>
@@ -24,6 +33,12 @@ export function ShareScreen({ isSharing, onShare, onGoHome }: ShareScreenProps) 
       >
         {isSharing ? '공유 시트를 여는 중이에요' : '친구에게 카드 공유하기'}
       </button>
+
+      {hasSharerCode && (
+        <button type="button" className="btn-outline" onClick={onGoMyChemistry}>
+          내 케미 모아보기
+        </button>
+      )}
 
       {/* <AdSlot screen="share" /> */}
 

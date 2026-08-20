@@ -4,15 +4,18 @@ import './App.css'
 import { Dialog } from './components/Dialog'
 import { IntroScreen } from './components/IntroScreen'
 import { LoadingScreen } from './components/LoadingScreen'
+import { MyChemistryScreen } from './components/MyChemistryScreen'
 import { QuestionScreen } from './components/QuestionScreen'
 import { ResultScreen } from './components/ResultScreen'
 import { ShareScreen } from './components/ShareScreen'
 import { PERSONAS } from './data/personas'
 import { QUESTIONS } from './data/questions'
+import { generateChemistryCode, visitChemistry } from './lib/chemistryApi'
+import { getReferralCodeFromUrl, getStoredSharerCode, storeSharerCode } from './lib/chemistryStorage'
 import { computeResult } from './lib/scoring'
-import type { DialogState, ElementType } from './types'
+import type { ChemistryVisitState, DialogState, ElementType } from './types'
 
-type AppScreen = 'intro' | 'question' | 'loading' | 'result' | 'share'
+type AppScreen = 'intro' | 'question' | 'loading' | 'result' | 'share' | 'my-chemistry'
 
 // apps-in-toss.config.ts의 appName과 같은 값이에요.
 const SHARE_PATH = 'intoss://ai-persona-card'
@@ -24,14 +27,35 @@ function App() {
   const [dialog, setDialog] = useState<DialogState | null>(null)
   const [isSharing, setIsSharing] = useState(false)
 
+  // 케미(궁합) 기능: 친구 링크로 들어왔는지, 내 공유 코드가 있는지, 방문 조회 상태예요.
+  const [referralCode] = useState<string | null>(() => getReferralCodeFromUrl())
+  const [sharerCode, setSharerCode] = useState<string | null>(() => getStoredSharerCode())
+  const [chemistry, setChemistry] = useState<ChemistryVisitState>({ status: 'idle' })
+
   const result = useMemo(() => computeResult(answers), [answers])
   const persona = useMemo(() => PERSONAS[result.personaKey], [result.personaKey])
 
   const startQuiz = () => {
     setAnswers([])
     setQuestionIndex(0)
+    setChemistry({ status: 'idle' })
     setScreen('question')
   }
+
+  // 친구 링크로 들어온 상태에서 카드를 완성하면(결과 화면 도달) 케미 조회를 한 번 호출해요.
+  useEffect(() => {
+    if (screen !== 'result') return
+    if (!referralCode) return
+    if (chemistry.status !== 'idle') return
+
+    setChemistry({ status: 'loading' })
+    visitChemistry(referralCode, persona.key)
+      .then((data) => setChemistry({ status: 'success', data }))
+      .catch((error: unknown) => {
+        console.error('케미 결과를 확인하지 못했어요', error)
+        setChemistry({ status: 'error' })
+      })
+  }, [screen, referralCode, persona.key, chemistry.status])
 
   const selectAnswer = (element: ElementType) => {
     const nextAnswers = [...answers, element]
@@ -48,7 +72,21 @@ function App() {
   const handleShare = async () => {
     setIsSharing(true)
     try {
-      const link = await Share.createLink({ path: SHARE_PATH })
+      let code = sharerCode
+      if (!code) {
+        try {
+          const generated = await generateChemistryCode(persona.key)
+          code = generated.sharerCode
+          storeSharerCode(code)
+          setSharerCode(code)
+        } catch (error) {
+          // 케미 코드 발급이 실패해도 카드 공유 자체는 그대로 진행해요.
+          console.error('케미 공유 코드를 발급받지 못했어요', error)
+        }
+      }
+
+      const path = code ? `${SHARE_PATH}?ref=${code}` : SHARE_PATH
+      const link = await Share.createLink({ path })
       await Share.sendMessage({
         message: `AI 페르소나 카드에서 내 원소 타입을 확인해봐요! ${link}`,
       })
@@ -80,6 +118,10 @@ function App() {
           setScreen('result')
           return
         }
+        if (screen === 'my-chemistry') {
+          setScreen('share')
+          return
+        }
         setScreen('intro')
       },
       onError: (error) => {
@@ -92,7 +134,7 @@ function App() {
 
   return (
     <div className="app">
-      {screen === 'intro' && <IntroScreen onStart={startQuiz} />}
+      {screen === 'intro' && <IntroScreen onStart={startQuiz} hasReferral={!!referralCode} />}
 
       {screen === 'question' && (
         <QuestionScreen
@@ -114,11 +156,22 @@ function App() {
           onShare={handleShare}
           onRetake={startQuiz}
           onGoShare={() => setScreen('share')}
+          chemistry={chemistry}
         />
       )}
 
       {screen === 'share' && (
-        <ShareScreen isSharing={isSharing} onShare={handleShare} onGoHome={() => setScreen('intro')} />
+        <ShareScreen
+          isSharing={isSharing}
+          onShare={handleShare}
+          onGoHome={() => setScreen('intro')}
+          hasSharerCode={!!sharerCode}
+          onGoMyChemistry={() => setScreen('my-chemistry')}
+        />
+      )}
+
+      {screen === 'my-chemistry' && sharerCode && (
+        <MyChemistryScreen sharerCode={sharerCode} onBack={() => setScreen('share')} />
       )}
 
       {dialog?.kind === 'share-error' && (
