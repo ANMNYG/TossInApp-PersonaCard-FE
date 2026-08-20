@@ -28,6 +28,13 @@ export function elementIcon(element: ElementType): string {
   return ELEMENT_ICON[element]
 }
 
+/** 순수형은 아이콘 1개, 혼합형은 주원소+보조원소 아이콘을 이어붙여요. */
+export function personaIcon(persona: Persona): string {
+  return persona.secondary
+    ? `${elementIcon(persona.primary)}${elementIcon(persona.secondary)}`
+    : elementIcon(persona.primary)
+}
+
 /**
  * 질문마다 자연스러운 문장으로 이어지는 도입부예요. QUESTIONS와 같은 순서고,
  * 뒤에 "'선택한 답변'를 고르셨어요" 형태로 붙어요 (예: "쉬는 날엔 '훌쩍 즉흥 여행을
