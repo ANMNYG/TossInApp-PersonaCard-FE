@@ -33,11 +33,12 @@ export function generateChemistryCode(sharerType: PersonaTypeKey): Promise<Gener
 export function visitChemistry(
   sharerCode: string,
   visitorType: PersonaTypeKey,
+  nickname?: string | null,
 ): Promise<ChemistryVisitResult> {
   return requestJson<ChemistryVisitResult>('/api/chemistry/visit', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ sharerCode, visitorType }),
+    body: JSON.stringify({ sharerCode, visitorType, nickname: nickname ?? null }),
   })
 }
 
