@@ -52,6 +52,8 @@ export interface ChemistryCompatibility {
 
 export interface ChemistryVisitor {
   visitorType: PersonaTypeKey
+  /** 방문자가 남긴 닉네임을 마스킹한 값이에요. 남기지 않았으면 null이에요. */
+  nickname: string | null
   visitedAt: string
   compatibility: ChemistryCompatibility
 }
