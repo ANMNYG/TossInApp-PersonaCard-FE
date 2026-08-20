@@ -44,3 +44,28 @@ export interface Persona {
 }
 
 export type DialogState = { kind: 'share-error' }
+
+export interface ChemistryCompatibility {
+  score: number
+  description: string
+}
+
+export interface ChemistryVisitor {
+  visitorType: PersonaTypeKey
+  visitedAt: string
+  compatibility: ChemistryCompatibility
+}
+
+export interface ChemistryVisitResult {
+  sharerCode: string
+  sharerType: PersonaTypeKey
+  visitorType: PersonaTypeKey
+  compatibility: ChemistryCompatibility
+}
+
+/** 방문자(친구 링크로 들어온 사용자) 플로우에서 케미 조회 API 호출 상태예요. */
+export type ChemistryVisitState =
+  | { status: 'idle' }
+  | { status: 'loading' }
+  | { status: 'success'; data: ChemistryVisitResult }
+  | { status: 'error' }
