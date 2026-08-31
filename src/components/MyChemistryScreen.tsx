@@ -75,6 +75,7 @@ export function MyChemistryScreen({ sharerCode, onBack }: MyChemistryScreenProps
                 </span>
                 <div className="chemistry-visitor-body">
                   <div className="chemistry-visitor-title">{visitor.nickname ?? `방문자 ${index + 1}`}</div>
+                  <div className="chemistry-visitor-type">{persona.title}</div>
                   <p className="chemistry-visitor-desc">{visitor.compatibility.description}</p>
                 </div>
                 <div className="chemistry-visitor-score">{visitor.compatibility.score}</div>

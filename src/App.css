@@ -518,6 +518,26 @@
   color: var(--gold-text);
   margin-bottom: 12px;
 }
+.chemistry-headline {
+  font-size: 14px;
+  line-height: 1.5;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0 0 6px;
+}
+.chemistry-headline strong {
+  color: var(--gold-text);
+}
+.chemistry-sharer-card {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--muted);
+  margin: 0 0 14px;
+}
+.chemistry-sharer-card strong {
+  color: var(--text);
+  font-weight: 700;
+}
 .chemistry-pair {
   display: flex;
   align-items: center;
@@ -542,6 +562,14 @@
   font-size: 10.5px;
   font-weight: 700;
   color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+.chemistry-avatar-sub {
+  font-size: 9.5px;
+  color: var(--muted);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -604,6 +632,12 @@
 .chemistry-visitor-title {
   font-size: 13px;
   font-weight: 700;
+  margin-bottom: 2px;
+}
+.chemistry-visitor-type {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--gold-text);
   margin-bottom: 3px;
 }
 .chemistry-visitor-desc {
