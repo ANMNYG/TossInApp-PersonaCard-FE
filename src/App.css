@@ -458,6 +458,40 @@
   font-size: 15px;
 }
 
+/* ---- chemistry: nickname prompt ---- */
+.nickname-box {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 18px;
+  background: var(--panel-2);
+}
+.nickname-guide {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--muted);
+  margin: 0;
+}
+.nickname-input {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--text);
+  border-radius: 14px;
+  padding: 13px 14px;
+  font-size: 14px;
+  font-family: inherit;
+}
+.nickname-input:focus {
+  outline: none;
+  border-color: var(--gold-light);
+}
+.nickname-box .skip-link {
+  margin-top: 0;
+}
+
 /* ---- chemistry: result screen section ---- */
 .chemistry-box-loading {
   font-family: monospace;
