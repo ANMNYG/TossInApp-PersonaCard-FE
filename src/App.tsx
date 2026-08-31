@@ -11,7 +11,13 @@ import { ShareScreen } from './components/ShareScreen'
 import { PERSONAS } from './data/personas'
 import { QUESTIONS } from './data/questions'
 import { generateChemistryCode, visitChemistry } from './lib/chemistryApi'
-import { getReferralCodeFromUrl, getStoredSharerCode, storeSharerCode } from './lib/chemistryStorage'
+import {
+  getReferralCodeFromUrl,
+  getStoredSharerCode,
+  getStoredSharerNickname,
+  storeSharerCode,
+  storeSharerNickname,
+} from './lib/chemistryStorage'
 import { computeResult } from './lib/scoring'
 import type { ChemistryVisitState, DialogState, ElementType } from './types'
 
@@ -34,6 +40,12 @@ function App() {
   // 닉네임 입력/건너뛰기를 아직 선택하지 않았으면 null이에요. 케미 조회는 이 선택 이후에 시작해요.
   const [visitorNickname, setVisitorNickname] = useState<string | null>(null)
   const [nicknameDecided, setNicknameDecided] = useState(false)
+
+  // 공유자(나) 본인 닉네임: 이전에 남긴 값이 있으면 그대로 쓰고, 없으면 결과 화면에서 한 번 물어봐요.
+  const [sharerNickname, setSharerNickname] = useState<string | null>(() => getStoredSharerNickname())
+  const [sharerNicknameDecided, setSharerNicknameDecided] = useState(
+    () => getStoredSharerNickname() !== null,
+  )
 
   const result = useMemo(() => computeResult(answers), [answers])
   const persona = useMemo(() => PERSONAS[result.personaKey], [result.personaKey])
@@ -73,6 +85,16 @@ function App() {
     setNicknameDecided(true)
   }
 
+  const handleSharerNicknameSubmit = (nickname: string) => {
+    setSharerNickname(nickname)
+    storeSharerNickname(nickname)
+    setSharerNicknameDecided(true)
+  }
+
+  const handleSharerNicknameSkip = () => {
+    setSharerNicknameDecided(true)
+  }
+
   const selectAnswer = (element: ElementType) => {
     const nextAnswers = [...answers, element]
     setAnswers(nextAnswers)
@@ -91,7 +113,7 @@ function App() {
       let code = sharerCode
       if (!code) {
         try {
-          const generated = await generateChemistryCode(persona.key)
+          const generated = await generateChemistryCode(persona.key, sharerNickname)
           code = generated.sharerCode
           storeSharerCode(code)
           setSharerCode(code)
@@ -172,10 +194,14 @@ function App() {
           onShare={handleShare}
           onRetake={startQuiz}
           onGoShare={() => setScreen('share')}
+          isVisitor={!!referralCode}
           chemistry={chemistry}
           needsNickname={!!referralCode && !nicknameDecided}
           onSubmitNickname={handleNicknameSubmit}
           onSkipNickname={handleNicknameSkip}
+          needsSharerNickname={!referralCode && !sharerCode && !sharerNicknameDecided}
+          onSubmitSharerNickname={handleSharerNicknameSubmit}
+          onSkipSharerNickname={handleSharerNicknameSkip}
         />
       )}
 

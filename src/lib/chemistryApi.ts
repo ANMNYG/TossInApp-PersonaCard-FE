@@ -10,6 +10,8 @@ export interface GenerateCodeResponse {
 export interface MyVisitorsResponse {
   sharerCode: string
   sharerType: PersonaTypeKey
+  /** 공유자가 남긴 닉네임을 마스킹한 값이에요. 백엔드가 아직 안 내려주면 undefined일 수 있어요. */
+  sharerNickname?: string | null
   visitorCount: number
   visitors: ChemistryVisitor[]
 }
@@ -22,11 +24,14 @@ async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
   return response.json() as Promise<T>
 }
 
-export function generateChemistryCode(sharerType: PersonaTypeKey): Promise<GenerateCodeResponse> {
+export function generateChemistryCode(
+  sharerType: PersonaTypeKey,
+  nickname?: string | null,
+): Promise<GenerateCodeResponse> {
   return requestJson<GenerateCodeResponse>('/api/chemistry/generate-code', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ sharerType }),
+    body: JSON.stringify({ sharerType, nickname: nickname ?? null }),
   })
 }
 
