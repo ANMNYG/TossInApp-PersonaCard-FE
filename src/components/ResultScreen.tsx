@@ -18,12 +18,18 @@ export interface ResultScreenProps {
   onShare: () => Promise<void>
   onRetake: () => void
   onGoShare: () => void
+  /** 친구의 케미 링크(?ref=)로 들어온 방문자인지 여부예요. */
+  isVisitor: boolean
   /** 친구 링크로 들어와 카드를 완성했을 때의 케미 조회 상태예요. idle이면 아무것도 보여주지 않아요. */
   chemistry: ChemistryVisitState
-  /** true면 케미 조회 전에 닉네임 입력/건너뛰기를 먼저 물어봐요. */
+  /** true면 케미 조회 전에 방문자 닉네임 입력/건너뛰기를 먼저 물어봐요. */
   needsNickname: boolean
   onSubmitNickname: (nickname: string) => void
   onSkipNickname: () => void
+  /** true면 코드 발급 전에 공유자 본인 닉네임 입력/건너뛰기를 물어봐요. */
+  needsSharerNickname: boolean
+  onSubmitSharerNickname: (nickname: string) => void
+  onSkipSharerNickname: () => void
 }
 
 export function ResultScreen({
@@ -33,10 +39,14 @@ export function ResultScreen({
   onShare,
   onRetake,
   onGoShare,
+  isVisitor,
   chemistry,
   needsNickname,
   onSubmitNickname,
   onSkipNickname,
+  needsSharerNickname,
+  onSubmitSharerNickname,
+  onSkipSharerNickname,
 }: ResultScreenProps) {
   const cardRef = useRef<ResultCardHandle>(null)
   const [locked, setLocked] = useState(true)
@@ -62,6 +72,32 @@ export function ResultScreen({
   return (
     <div className="screen screen-result">
       <ResultCard ref={cardRef} persona={persona} seed={seed} locked={locked} />
+
+      {/* 방문자 케미 흐름: 내 카드 잠금 여부와 무관하게 먼저 노출해요.
+          (잠금은 공유자의 카드 공개용이라, 방문자에게는 케미 결과가 우선이에요.) */}
+      {isVisitor && needsNickname && (
+        <NicknamePrompt onSubmit={onSubmitNickname} onSkip={onSkipNickname} />
+      )}
+      {isVisitor && !needsNickname && chemistry.status === 'loading' && (
+        <div className="chemistry-box-loading">케미 결과를 확인하고 있어요...</div>
+      )}
+      {isVisitor && !needsNickname && chemistry.status === 'success' && (
+        <ChemistryResult result={chemistry.data} />
+      )}
+      {isVisitor && !needsNickname && chemistry.status === 'error' && (
+        <div className="chemistry-box-loading">
+          케미 결과를 확인하지 못했어요. 잠시 후 다시 시도해주세요.
+        </div>
+      )}
+
+      {/* 공유자 닉네임: 코드 발급(공유) 전에 잠금 여부와 무관하게 물어봐요. */}
+      {!isVisitor && needsSharerNickname && (
+        <NicknamePrompt
+          onSubmit={onSubmitSharerNickname}
+          onSkip={onSkipSharerNickname}
+          guide="친구가 케미 결과에서 나를 알아볼 수 있게 닉네임을 남겨보세요 (선택)"
+        />
+      )}
 
       {locked ? (
         <>
@@ -89,12 +125,6 @@ export function ResultScreen({
           <div className="persona-title">{persona.title}</div>
           <p className="persona-desc">{persona.description}</p>
           <ResultInterpretation persona={persona} answers={answers} />
-
-          {needsNickname && <NicknamePrompt onSubmit={onSubmitNickname} onSkip={onSkipNickname} />}
-          {!needsNickname && chemistry.status === 'loading' && (
-            <div className="chemistry-box-loading">케미 결과를 확인하고 있어요...</div>
-          )}
-          {!needsNickname && chemistry.status === 'success' && <ChemistryResult result={chemistry.data} />}
 
           <button type="button" className="btn" onClick={handleSave}>
             고화질로 저장해요

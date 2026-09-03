@@ -61,6 +61,8 @@ export interface ChemistryVisitor {
 export interface ChemistryVisitResult {
   sharerCode: string
   sharerType: PersonaTypeKey
+  /** 공유자가 남긴 닉네임을 마스킹한 값이에요. 백엔드가 아직 안 내려주면 undefined일 수 있어요. */
+  sharerNickname?: string | null
   visitorType: PersonaTypeKey
   compatibility: ChemistryCompatibility
 }
