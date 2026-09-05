@@ -100,7 +100,7 @@ export function ResultScreen({
         <NicknamePrompt
           onSubmit={onSubmitSharerNickname}
           onSkip={onSkipSharerNickname}
-          guide="친구가 케미 결과에서 나를 알아볼 수 있게 닉네임을 남겨보세요 (선택)"
+          guide="친구가 케미 결과에서 나를 알아볼 수 있게 이름을 남겨보세요 (선택)"
         />
       )}
 
