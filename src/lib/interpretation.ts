@@ -149,6 +149,139 @@ const TYPE_INSIGHTS: Record<PersonaTypeKey, TypeInsight> = {
   },
 }
 
+export interface CompatibilityMatch {
+  key: PersonaTypeKey
+  /** 왜 잘 맞는지/안 맞을 수 있는지를 가볍고 재미있게 설명하는 한 줄이에요. */
+  reason: string
+}
+
+export interface TypeCompatibility {
+  /** 잘 맞는 유형 1~2개 */
+  good: CompatibilityMatch[]
+  /** 안 맞을 수 있는 유형 1~2개 */
+  bad: CompatibilityMatch[]
+}
+
+/**
+ * 타입별로 "이런 사람과는" 궁합 콘텐츠예요. 단정적으로 들리지 않도록 "~일 수 있어요" 톤을
+ * 유지하고, 재미 요소로 가볍게 봐 주세요. 실제 방문자 케미 점수(ChemistryCompatibility)와는
+ * 별개의 정적 콘텐츠예요.
+ */
+export const TYPE_COMPATIBILITY: Record<PersonaTypeKey, TypeCompatibility> = {
+  fire: {
+    good: [
+      { key: 'air', reason: '자유로운 방랑자와는 함께 있으면 에너지가 배가 되는 사이예요.' },
+      { key: 'water', reason: '잔잔한 몽상가와는 정반대 온도라서 오히려 서로를 채워주는 케미예요.' },
+    ],
+    bad: [{ key: 'earth', reason: '단단한 수호자와는 속도 차이 때문에 답답함을 느낄 수 있어요.' }],
+  },
+  water: {
+    good: [
+      { key: 'earth', reason: '단단한 수호자와는 서로의 깊이를 알아봐주는 편안한 사이예요.' },
+      { key: 'fire', reason: '불꽃 탐험가와는 온도차가 오히려 자극이 되는 사이예요.' },
+    ],
+    bad: [{ key: 'air', reason: '자유로운 방랑자와는 원하는 거리감이 달라 서운해질 수 있어요.' }],
+  },
+  earth: {
+    good: [
+      { key: 'water', reason: '잔잔한 몽상가와는 말 없이도 통하는 든든한 사이예요.' },
+      { key: 'air', reason: '자유로운 방랑자와는 정반대 매력이라 곁에 있으면 시야가 넓어져요.' },
+    ],
+    bad: [{ key: 'fire', reason: '불꽃 탐험가와는 속도 차이 때문에 서로 지칠 수 있어요.' }],
+  },
+  air: {
+    good: [
+      { key: 'fire', reason: '불꽃 탐험가와는 함께 있으면 텐션이 두 배가 되는 사이예요.' },
+      { key: 'earth', reason: '단단한 수호자와는 정반대 성향이라 오히려 마음이 편안해지는 사이예요.' },
+    ],
+    bad: [{ key: 'water', reason: '잔잔한 몽상가와는 원하는 거리감이 달라 답답할 수 있어요.' }],
+  },
+  'fire-water': {
+    good: [
+      { key: 'air-fire', reason: '뜨거운 바람과는 열정 온도가 비슷해서 죽이 잘 맞는 사이예요.' },
+      { key: 'earth-water', reason: '비옥한 대지와는 서로의 섬세함을 알아봐주는 사이예요.' },
+    ],
+    bad: [{ key: 'earth-air', reason: '흔들리지 않는 산과는 리듬이 안 맞아 서로 답답할 수 있어요.' }],
+  },
+  'fire-earth': {
+    good: [
+      { key: 'air-fire', reason: '뜨거운 바람과는 새로운 걸 같이 벌이기 딱 좋은 사이예요.' },
+      { key: 'water-earth', reason: '고요한 뿌리와는 추진력과 안정감이 맞물리는 사이예요.' },
+    ],
+    bad: [{ key: 'water-air', reason: '자유로운 물결과는 방향이 자주 엇갈릴 수 있어요.' }],
+  },
+  'fire-air': {
+    good: [
+      { key: 'air-fire', reason: '뜨거운 바람과는 같이 있으면 못 말리게 신나는 사이예요.' },
+      { key: 'air-water', reason: '자유로운 물결과는 서로의 자유로움을 인정해주는 사이예요.' },
+    ],
+    bad: [{ key: 'earth-water', reason: '비옥한 대지와는 속도 차이 때문에 서로 답답해질 수 있어요.' }],
+  },
+  'water-fire': {
+    good: [
+      { key: 'earth-fire', reason: '단단한 불씨와는 겉은 다르지만 속은 닮아서 편안한 사이예요.' },
+      { key: 'fire-water', reason: '뜨거운 파도와는 서로의 온도를 이해해주는 사이예요.' },
+    ],
+    bad: [{ key: 'air-earth', reason: '정착한 방랑자와는 마음을 여는 속도가 달라 서운할 수 있어요.' }],
+  },
+  'water-earth': {
+    good: [
+      { key: 'earth-water', reason: '비옥한 대지와는 서로 깊이 이해하는 안정적인 사이예요.' },
+      { key: 'fire-earth', reason: '불타는 개척자와는 잔잔함과 추진력이 균형을 이루는 사이예요.' },
+    ],
+    bad: [{ key: 'air-fire', reason: '뜨거운 바람과는 속도 차이로 서로 지칠 수 있어요.' }],
+  },
+  'water-air': {
+    good: [
+      { key: 'air-water', reason: '자유로운 물결과는 흘러가는 방향이 비슷한 사이예요.' },
+      { key: 'earth-water', reason: '비옥한 대지와는 감정을 깊이 나눌 수 있는 사이예요.' },
+    ],
+    bad: [{ key: 'fire-earth', reason: '불타는 개척자와는 리듬이 달라 서로 부담스러울 수 있어요.' }],
+  },
+  'earth-fire': {
+    good: [
+      { key: 'water-fire', reason: '잔잔한 불씨와는 서로 닮은 온도라 편안한 사이예요.' },
+      { key: 'fire-earth', reason: '불타는 개척자와는 안정감과 추진력이 서로를 끌어주는 사이예요.' },
+    ],
+    bad: [{ key: 'air-water', reason: '자유로운 물결과는 서로 원하는 확실함의 정도가 달라 답답할 수 있어요.' }],
+  },
+  'earth-water': {
+    good: [
+      { key: 'water-earth', reason: '고요한 뿌리와는 서로를 가장 깊이 이해해주는 사이예요.' },
+      { key: 'earth-air', reason: '흔들리지 않는 산과는 안정감이 배가 되는 사이예요.' },
+    ],
+    bad: [{ key: 'fire-air', reason: '질주하는 불꽃과는 속도 차이 때문에 부담스러울 수 있어요.' }],
+  },
+  'earth-air': {
+    good: [
+      { key: 'air-earth', reason: '정착한 방랑자와는 안정과 자유의 균형이 잘 맞는 사이예요.' },
+      { key: 'earth-water', reason: '비옥한 대지와는 흔들림 없는 편안함을 주는 사이예요.' },
+    ],
+    bad: [{ key: 'fire-water', reason: '뜨거운 파도와는 감정의 파도를 따라가기 벅찰 수 있어요.' }],
+  },
+  'air-fire': {
+    good: [
+      { key: 'fire-air', reason: '질주하는 불꽃과는 만나면 못 말리게 재밌어지는 사이예요.' },
+      { key: 'fire-water', reason: '뜨거운 파도와는 열정 코드가 잘 맞는 사이예요.' },
+    ],
+    bad: [{ key: 'water-earth', reason: '고요한 뿌리와는 속도 차이 때문에 서로 답답해질 수 있어요.' }],
+  },
+  'air-water': {
+    good: [
+      { key: 'water-air', reason: '유영하는 몽상가와는 물 흐르듯 잘 맞는 사이예요.' },
+      { key: 'air-fire', reason: '뜨거운 바람과는 자유로움을 서로 존중해주는 사이예요.' },
+    ],
+    bad: [{ key: 'earth-fire', reason: '단단한 불씨와는 원하는 확실함의 정도가 달라 부담스러울 수 있어요.' }],
+  },
+  'air-earth': {
+    good: [
+      { key: 'earth-air', reason: '흔들리지 않는 산과는 안정과 자유가 균형 잡히는 사이예요.' },
+      { key: 'water-earth', reason: '고요한 뿌리와는 마음 붙일 곳을 함께 찾아가는 사이예요.' },
+    ],
+    bad: [{ key: 'fire-water', reason: '뜨거운 파도와는 감정 기복을 따라가기 벅찰 수 있어요.' }],
+  },
+}
+
 function indicesFor(answers: ElementType[], element: ElementType): number[] {
   return answers.reduce<number[]>((acc, answer, index) => {
     if (answer === element) acc.push(index)
