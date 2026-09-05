@@ -1,5 +1,6 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { drawBrandSignature } from '../lib/drawPersonaCard'
+import { fetchVisitorCount } from '../lib/statsApi'
 import { ChemistryBanner } from './ChemistryBanner'
 import { StatusLine } from './StatusLine'
 
@@ -11,11 +12,27 @@ export interface IntroScreenProps {
 
 export function IntroScreen({ onStart, hasReferral = false }: IntroScreenProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const [visitorCount, setVisitorCount] = useState<number | undefined>(undefined)
 
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
     drawBrandSignature(canvas)
+  }, [])
+
+  useEffect(() => {
+    let cancelled = false
+    fetchVisitorCount()
+      .then((count) => {
+        if (!cancelled) setVisitorCount(count)
+      })
+      .catch((error: unknown) => {
+        // API가 아직 없거나 실패하면 숫자 없는 문구로 자연스럽게 폴백해요.
+        console.error('방문자 수를 가져오지 못했어요', error)
+      })
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   return (
@@ -39,7 +56,7 @@ export function IntroScreen({ onStart, hasReferral = false }: IntroScreenProps) 
       <button type="button" className="btn" onClick={onStart}>
         지금 카드 만들어봐요
       </button>
-      <StatusLine />
+      <StatusLine count={visitorCount} />
     </div>
   )
 }
