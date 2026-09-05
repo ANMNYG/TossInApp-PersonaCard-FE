@@ -45,6 +45,13 @@ export interface Persona {
 
 export type DialogState = { kind: 'share-error' }
 
+/** 완성한 카드를 localStorage에 저장할 때의 모양이에요. 재방문 시 질문 없이 바로 복원해요. */
+export interface SavedCard {
+  personaKey: PersonaTypeKey
+  answers: ElementType[]
+  completedAt: string
+}
+
 export interface ChemistryCompatibility {
   score: number
   description: string

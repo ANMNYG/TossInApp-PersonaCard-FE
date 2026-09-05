@@ -13,8 +13,10 @@ import { QUESTIONS } from './data/questions'
 import { generateChemistryCode, visitChemistry } from './lib/chemistryApi'
 import {
   getReferralCodeFromUrl,
+  getStoredCard,
   getStoredSharerCode,
   getStoredSharerNickname,
+  storeCard,
   storeSharerCode,
   storeSharerNickname,
 } from './lib/chemistryStorage'
@@ -27,11 +29,15 @@ type AppScreen = 'intro' | 'question' | 'loading' | 'result' | 'share' | 'my-che
 const SHARE_PATH = 'intoss://ai-persona-card'
 
 function App() {
-  const [screen, setScreen] = useState<AppScreen>('intro')
+  // 저장된 카드가 있으면 인트로/질문을 건너뛰고 바로 결과 화면으로 들어가요.
+  const [savedCard] = useState(() => getStoredCard())
+  const [screen, setScreen] = useState<AppScreen>(savedCard ? 'result' : 'intro')
   const [questionIndex, setQuestionIndex] = useState(0)
-  const [answers, setAnswers] = useState<ElementType[]>([])
+  const [answers, setAnswers] = useState<ElementType[]>(savedCard?.answers ?? [])
   const [dialog, setDialog] = useState<DialogState | null>(null)
   const [isSharing, setIsSharing] = useState(false)
+  // "내 케미 모아보기"를 결과 화면/공유 화면 중 어디서 열었는지 기억해서, 뒤로가기를 그 화면으로 보내요.
+  const [myChemistryOrigin, setMyChemistryOrigin] = useState<'result' | 'share'>('share')
 
   // 케미(궁합) 기능: 친구 링크로 들어왔는지, 내 공유 코드가 있는지, 방문 조회 상태예요.
   const [referralCode] = useState<string | null>(() => getReferralCodeFromUrl())
@@ -93,6 +99,12 @@ function App() {
 
   const handleSharerNicknameSkip = () => {
     setSharerNicknameDecided(true)
+  }
+
+  // 질문을 다 풀고 로딩이 끝나면 결과를 저장해요. 다시 만들면 이 시점에 이전 저장 값을 덮어써요.
+  const finishQuiz = () => {
+    storeCard({ personaKey: result.personaKey, answers: result.answers, completedAt: new Date().toISOString() })
+    setScreen('result')
   }
 
   const selectAnswer = (element: ElementType) => {
@@ -157,7 +169,7 @@ function App() {
           return
         }
         if (screen === 'my-chemistry') {
-          setScreen('share')
+          setScreen(myChemistryOrigin)
           return
         }
         setScreen('intro')
@@ -168,7 +180,7 @@ function App() {
     })
 
     return unsubscribe
-  }, [screen, dialog])
+  }, [screen, dialog, myChemistryOrigin])
 
   return (
     <div className="app">
@@ -184,7 +196,7 @@ function App() {
         />
       )}
 
-      {screen === 'loading' && <LoadingScreen onComplete={() => setScreen('result')} />}
+      {screen === 'loading' && <LoadingScreen onComplete={finishQuiz} />}
 
       {screen === 'result' && (
         <ResultScreen
@@ -202,6 +214,11 @@ function App() {
           needsSharerNickname={!referralCode && !sharerCode && !sharerNicknameDecided}
           onSubmitSharerNickname={handleSharerNicknameSubmit}
           onSkipSharerNickname={handleSharerNicknameSkip}
+          hasSharerCode={!!sharerCode}
+          onGoMyChemistry={() => {
+            setMyChemistryOrigin('result')
+            setScreen('my-chemistry')
+          }}
         />
       )}
 
@@ -211,12 +228,15 @@ function App() {
           onShare={handleShare}
           onGoHome={() => setScreen('intro')}
           hasSharerCode={!!sharerCode}
-          onGoMyChemistry={() => setScreen('my-chemistry')}
+          onGoMyChemistry={() => {
+            setMyChemistryOrigin('share')
+            setScreen('my-chemistry')
+          }}
         />
       )}
 
       {screen === 'my-chemistry' && sharerCode && (
-        <MyChemistryScreen sharerCode={sharerCode} onBack={() => setScreen('share')} />
+        <MyChemistryScreen sharerCode={sharerCode} onBack={() => setScreen(myChemistryOrigin)} />
       )}
 
       {dialog?.kind === 'share-error' && (

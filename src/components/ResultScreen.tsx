@@ -30,6 +30,9 @@ export interface ResultScreenProps {
   needsSharerNickname: boolean
   onSubmitSharerNickname: (nickname: string) => void
   onSkipSharerNickname: () => void
+  /** 케미 공유 코드를 발급받은 적이 있으면 "내 케미 모아보기"를 상시 노출해요. */
+  hasSharerCode: boolean
+  onGoMyChemistry: () => void
 }
 
 export function ResultScreen({
@@ -47,6 +50,8 @@ export function ResultScreen({
   needsSharerNickname,
   onSubmitSharerNickname,
   onSkipSharerNickname,
+  hasSharerCode,
+  onGoMyChemistry,
 }: ResultScreenProps) {
   const cardRef = useRef<ResultCardHandle>(null)
   const [locked, setLocked] = useState(true)
@@ -137,6 +142,11 @@ export function ResultScreen({
               공유하러 가요
             </button>
           </div>
+          {hasSharerCode && (
+            <button type="button" className="btn-outline my-chemistry-link" onClick={onGoMyChemistry}>
+              내 케미 모아보기
+            </button>
+          )}
         </>
       )}
 

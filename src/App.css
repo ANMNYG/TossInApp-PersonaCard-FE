@@ -374,6 +374,9 @@
 .btn-row .btn-outline {
   flex: 1;
 }
+.my-chemistry-link {
+  margin-top: 10px;
+}
 
 .interpretation-box {
   display: flex;
