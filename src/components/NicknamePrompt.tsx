@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react'
 
 const NICKNAME_MAX_LENGTH = 10
 
-const DEFAULT_GUIDE = '닉네임을 남기면 상대방이 더 쉽게 알아볼 수 있어요 (선택)'
+const DEFAULT_GUIDE = '이름을 남기면 친구가 더 쉽게 알아볼 수 있어요 (선택)'
 
 export interface NicknamePromptProps {
   /** 닉네임을 입력하고 확인했을 때 호출돼요. */
@@ -33,7 +33,7 @@ export function NicknamePrompt({ onSubmit, onSkip, guide = DEFAULT_GUIDE }: Nick
       <input
         type="text"
         className="nickname-input"
-        placeholder="닉네임 (최대 10자)"
+        placeholder="이름 (최대 10자)"
         value={nickname}
         maxLength={NICKNAME_MAX_LENGTH}
         onChange={(event) => setNickname(event.target.value)}

@@ -374,6 +374,9 @@
 .btn-row .btn-outline {
   flex: 1;
 }
+.my-chemistry-link {
+  margin-top: 10px;
+}
 
 .interpretation-box {
   display: flex;
@@ -430,6 +433,40 @@
   border-radius: 5px;
   padding: 1px 6px;
   margin-right: 6px;
+}
+
+.compat-box .interpretation-title {
+  margin-bottom: 10px;
+}
+.compat-group {
+  margin-bottom: 10px;
+}
+.compat-group:last-child {
+  margin-bottom: 0;
+}
+.compat-group-title {
+  display: block;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--gold-text);
+  margin-bottom: 4px;
+}
+.compat-group-title-bad {
+  color: var(--muted);
+}
+.compat-item {
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--muted);
+  margin: 0;
+}
+.compat-item + .compat-item {
+  margin-top: 4px;
+}
+.compat-item-name {
+  font-weight: 700;
+  color: var(--text);
+  margin-right: 4px;
 }
 
 /* ---- share screen ---- */

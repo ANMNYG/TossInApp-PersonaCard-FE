@@ -1,5 +1,8 @@
+import type { ElementType, SavedCard } from '../types'
+
 const SHARER_CODE_KEY = 'ai-persona-card:sharer-code'
 const SHARER_NICKNAME_KEY = 'ai-persona-card:sharer-nickname'
+const SAVED_CARD_KEY = 'ai-persona-card:saved-card'
 
 /** 예전에 발급받은 케미 공유 코드가 있으면 돌려줘요. 없거나 저장소에 접근할 수 없으면 null이에요. */
 export function getStoredSharerCode(): string | null {
@@ -32,6 +35,38 @@ export function getStoredSharerNickname(): string | null {
 export function storeSharerNickname(nickname: string): void {
   try {
     window.localStorage.setItem(SHARER_NICKNAME_KEY, nickname)
+  } catch {
+    // no-op
+  }
+}
+
+function isSavedCard(value: unknown): value is SavedCard {
+  if (!value || typeof value !== 'object') return false
+  const card = value as Record<string, unknown>
+  return (
+    typeof card.personaKey === 'string' &&
+    typeof card.completedAt === 'string' &&
+    Array.isArray(card.answers) &&
+    card.answers.every((answer): answer is ElementType => typeof answer === 'string')
+  )
+}
+
+/** 이전에 완성해서 저장해둔 카드가 있으면 돌려줘요. 없거나 저장소에 접근할 수 없으면 null이에요. */
+export function getStoredCard(): SavedCard | null {
+  try {
+    const raw = window.localStorage.getItem(SAVED_CARD_KEY)
+    if (!raw) return null
+    const parsed = JSON.parse(raw) as unknown
+    return isSavedCard(parsed) ? parsed : null
+  } catch {
+    return null
+  }
+}
+
+/** 카드를 완성할 때마다 저장해요. 다시 만들면 이전 저장 값을 덮어써요. 저장 실패해도 진행에는 영향 없어요. */
+export function storeCard(card: SavedCard): void {
+  try {
+    window.localStorage.setItem(SAVED_CARD_KEY, JSON.stringify(card))
   } catch {
     // no-op
   }
