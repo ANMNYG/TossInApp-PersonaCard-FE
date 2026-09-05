@@ -6,7 +6,6 @@ import type { ChemistryVisitor } from '../types'
 
 export interface MyChemistryScreenProps {
   sharerCode: string
-  onBack: () => void
 }
 
 type LoadState =
@@ -15,7 +14,7 @@ type LoadState =
   | { status: 'success'; visitorCount: number; visitors: ChemistryVisitor[] }
 
 /** 공유 코드로 들어온 방문자들의 케미 결과를 최신순으로 모아 보여주는 화면이에요. */
-export function MyChemistryScreen({ sharerCode, onBack }: MyChemistryScreenProps) {
+export function MyChemistryScreen({ sharerCode }: MyChemistryScreenProps) {
   const [state, setState] = useState<LoadState>({ status: 'loading' })
 
   useEffect(() => {
@@ -84,11 +83,6 @@ export function MyChemistryScreen({ sharerCode, onBack }: MyChemistryScreenProps
           })}
         </div>
       )}
-
-      <div className="spacer" />
-      <button type="button" className="btn-ghost" onClick={onBack}>
-        돌아가요
-      </button>
     </div>
   )
 }

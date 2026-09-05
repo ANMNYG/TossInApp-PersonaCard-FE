@@ -81,18 +81,6 @@
   cursor: pointer;
 }
 
-.btn-ghost {
-  border: none;
-  background: none;
-  color: var(--muted);
-  font-size: 12px;
-  text-align: center;
-  padding: 12px;
-  cursor: pointer;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
 /* ---- intro screen ---- */
 .card-preview {
   width: 100%;

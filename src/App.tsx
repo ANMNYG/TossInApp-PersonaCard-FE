@@ -226,7 +226,6 @@ function App() {
         <ShareScreen
           isSharing={isSharing}
           onShare={handleShare}
-          onGoHome={() => setScreen('intro')}
           hasSharerCode={!!sharerCode}
           onGoMyChemistry={() => {
             setMyChemistryOrigin('share')
@@ -235,9 +234,7 @@ function App() {
         />
       )}
 
-      {screen === 'my-chemistry' && sharerCode && (
-        <MyChemistryScreen sharerCode={sharerCode} onBack={() => setScreen(myChemistryOrigin)} />
-      )}
+      {screen === 'my-chemistry' && sharerCode && <MyChemistryScreen sharerCode={sharerCode} />}
 
       {dialog?.kind === 'share-error' && (
         <Dialog

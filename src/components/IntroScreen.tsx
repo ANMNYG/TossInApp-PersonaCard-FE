@@ -38,7 +38,6 @@ export function IntroScreen({ onStart, hasReferral = false }: IntroScreenProps) 
   return (
     <div className="screen screen-intro">
       {hasReferral && <ChemistryBanner />}
-      <div className="eyebrow">✦ AI 페르소나 카드</div>
       <h1 className="display">
         7개 질문으로
         <br />

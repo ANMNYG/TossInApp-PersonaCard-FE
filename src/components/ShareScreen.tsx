@@ -4,7 +4,6 @@
 export interface ShareScreenProps {
   isSharing: boolean
   onShare: () => void
-  onGoHome: () => void
   /** localStorage에 저장된 케미 공유 코드가 있을 때만 "내 케미 모아보기" 버튼을 보여줘요. */
   hasSharerCode: boolean
   onGoMyChemistry: () => void
@@ -13,7 +12,6 @@ export interface ShareScreenProps {
 export function ShareScreen({
   isSharing,
   onShare,
-  onGoHome,
   hasSharerCode,
   onGoMyChemistry,
 }: ShareScreenProps) {
@@ -41,11 +39,6 @@ export function ShareScreen({
       )}
 
       {/* <AdSlot screen="share" /> */}
-
-      <div className="spacer" />
-      <button type="button" className="btn-ghost" onClick={onGoHome}>
-        처음 화면으로 돌아가요
-      </button>
     </div>
   )
 }
